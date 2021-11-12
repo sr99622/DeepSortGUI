@@ -61,6 +61,9 @@ public:
 
     QObject *matcher;
 
+signals:
+    void output(int);
+
 };
 
 class Matcher : public Filter
@@ -84,6 +87,11 @@ public:
     Runner_0 *runner_0;
     Runner_1 *runner_1;
     Runner_2 *runner_2;
+
+    QLabel *elapsed_0;
+    QLabel *elapsed_1;
+    QLabel *elapsed_2;
+    QLabel *detection_count;
 
     NumberTextBox *txtNNBudget;
     NumberTextBox *txtMaxCosineDistance;

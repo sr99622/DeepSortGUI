@@ -170,6 +170,7 @@ MainWindow::MainWindow(CommandOptions *co, QWidget *parent) : QMainWindow(parent
         connect(launcher, SIGNAL(done()), control(), SLOT(play()));
         QThreadPool::globalInstance()->tryStart(launcher);
     }
+
 }
 
 void MainWindow::menuAction(QAction *action)
@@ -478,3 +479,4 @@ void Quitter::run()
 
     emit done();
 }
+

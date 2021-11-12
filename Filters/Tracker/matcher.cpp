@@ -28,22 +28,38 @@ Matcher::Matcher(QMainWindow *parent)
     txtNmsMaxOverlap->setFloatValue(MW->settings->value(nmsMaxOverlapKey, 1.0f).toFloat());
     connect(txtNmsMaxOverlap, SIGNAL(editingFinished()), this, SLOT(nmsMaxOverlapSet()));
 
+    elapsed_0 = new QLabel();
+    QLabel *lbl04 = new QLabel("time elpased:");
+    elapsed_1 = new QLabel();
+    QLabel *lbl05 = new QLabel("time elpased:");
+    elapsed_2 = new QLabel();
+    QLabel *lbl06 = new QLabel("time elpased:");
+    detection_count = new QLabel();
+    QLabel *lbl07 = new QLabel("count:");
+
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(darknet->panel,       0, 0, 1, 4);
-    layout->addWidget(featureModel,         1, 0, 1, 4);
-    layout->addWidget(lbl00,                2, 0, 1, 1);
-    layout->addWidget(txtNNBudget,          2, 1, 1, 1);
-    layout->addWidget(lbl01,                2, 2, 1, 1);
-    layout->addWidget(txtMaxCosineDistance, 2, 3, 1, 1);
-    layout->addWidget(lbl02,                3, 0, 1, 1);
-    layout->addWidget(txtMinConfidence,     3, 1, 1, 1);
-    layout->addWidget(lbl03,                3, 2, 1, 1);
-    layout->addWidget(txtNmsMaxOverlap,     3, 3, 1, 1);
+    layout->addWidget(lbl07,                1, 0, 1, 1, Qt::AlignRight);
+    layout->addWidget(detection_count,      1, 1, 1, 1);
+    layout->addWidget(lbl04,                1, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(elapsed_0,            1, 3, 1, 1);
+    layout->addWidget(featureModel,         2, 0, 1, 4);
+    layout->addWidget(lbl00,                3, 0, 1, 1);
+    layout->addWidget(txtNNBudget,          3, 1, 1, 1);
+    layout->addWidget(lbl01,                3, 2, 1, 1);
+    layout->addWidget(txtMaxCosineDistance, 3, 3, 1, 1);
+    layout->addWidget(lbl02,                4, 0, 1, 1);
+    layout->addWidget(txtMinConfidence,     4, 1, 1, 1);
+    layout->addWidget(lbl03,                4, 2, 1, 1);
+    layout->addWidget(txtNmsMaxOverlap,     4, 3, 1, 1);
+    layout->addWidget(lbl05,                5, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(elapsed_1,            5, 3, 1, 1);
     panel->setLayout(layout);
 
     runner_0 = new Runner_0(this);
     runner_1 = new Runner_1(this);
     runner_2 = new Runner_2(this);
+    //connect(runner_2, SIGNAL(output(int)), mainWindow, SLOT(updateCropDialog(int)));
 
     std::cout << "cfg->filename: " << darknet->cfg->filename.toStdString() << std::endl;
     std::cout << "weights->filename: " << darknet->weights->filename.toStdString() << std::endl;
@@ -115,7 +131,7 @@ void Matcher::nmsMaxOverlapSet()
 
 void Matcher::autoSave()
 {
-
+    darknet->autoSave();
 }
 
 bool Matcher::threadsFinished()
@@ -125,7 +141,6 @@ bool Matcher::threadsFinished()
 
 void Runner_0::run()
 {
-    std::cout << "runner 0 start: " << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     std::vector<bbox_t> detections = M->darknet->model->detector->detect(M->imageFrames[0].image);
@@ -142,18 +157,15 @@ void Runner_0::run()
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    std::cout << "runner 0 elapsed time: " << elapsed << std::endl;
+    M->detection_count->setText(QString::number(M->imageFrames[0].detections.size()));
+    M->elapsed_0->setText(QString::number(elapsed));
 }
 
 void Runner_1::run()
 {
-    std::cout << "runner 1 start: " << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
 
     if (M->imageFrames[1].image.rows > 0) {
-
-        std::cout << "test 1" << std::endl;
-
         M->imageFrames[1].getCrops();
         M->featureModel->infer(&M->imageFrames[1]);
 
@@ -163,31 +175,26 @@ void Runner_1::run()
         ModelDetection::getInstance()->dataMoreConf(M->txtMinConfidence->floatValue(), detections);
         ModelDetection::getInstance()->dataPreprocessing(M->txtNmsMaxOverlap->floatValue(), detections);
 
-        std::cout << "test 2" << std::endl;
-
         M->mytracker->predict();
-        std::cout << "test 2A: " << std::endl;
         M->mytracker->update(detections);
 
-        std::cout << "test 3" << std::endl;
-
-        std::vector<RESULT_DATA> result;
+        //std::vector<RESULT_DATA> result;
         for (Track& track : M->mytracker->tracks) {
             if (!track.is_confirmed() || track.time_since_update > 1)
                 continue;
-            result.push_back(std::make_pair(track.track_id, track.to_tlwh()));
+            M->imageFrames[1].result.push_back(std::make_pair(track.track_id, track.to_tlwh()));
         }
 
-        std::cout << "test 4" << std::endl;
-
-        for (size_t i = 0; i < result.size(); i++) {
-            DETECTBOX box = result[i].second;
+        /*
+        for (size_t i = 0; i < M->imageFrames[1].result.size(); i++) {
+            DETECTBOX box = M->imageFrames[1].result[i].second;
             cv::Rect rect = cv::Rect(box[0], box[1], box[2], box[3]);
             cv::rectangle(M->imageFrames[1].image, rect, cv::Scalar(255, 0, 0), 2);
-            cv::putText(M->imageFrames[1].image, QString::number(result[i].first).toStdString(), cv::Point(rect.x, rect.y),
+            cv::putText(M->imageFrames[1].image, QString::number(M->imageFrames[1].result[i].first).toStdString(), cv::Point(rect.x, rect.y),
                         cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
         }
+        */
 
     }
 
@@ -195,18 +202,79 @@ void Runner_1::run()
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    cout << "runner 1 elapsed time: " << elapsed << endl;
+    M->elapsed_1->setText(QString::number(elapsed));
 }
 
 void Runner_2::run()
 {
-    std::cout << "runner 2 start: " << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
+
+
+    //emit output(M->imageFrames[2].crops.size());
+
+
+
+
+    if (M->imageFrames[2].result.size() > 0) {
+
+        cv::Mat image(1024, 640, CV_8UC3);
+        //M->featureModel->cropDialog->lblImage->setText(QString::number(M->imageFrames[2].crops.size()));
+
+        size_t max_block = 80;
+        size_t loop_end = min(max_block, M->imageFrames[2].result.size());
+        for (size_t i = 0; i < loop_end; i++) {
+
+            int id = M->imageFrames[2].result[i].first % 80;
+            size_t y = id / 10;
+            size_t x = id - y * 10;
+
+
+            fbox box(M->imageFrames[2].result[i].second);
+            cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
+            crop.copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
+
+
+        /*
+        for (size_t y = 0; y < 8; y++) {
+            for (size_t x = 0; x < 10; x++) {
+                size_t i = y * 10 + x;
+                if (i < 80 && i < M->imageFrames[2].result.size()) {
+                    int id = M->imageFrames[2].result[i].first % 80;
+
+                    fbox box(M->imageFrames[2].result[i].second);
+                    cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
+                    crop.copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
+
+                    //M->imageFrames[2].crops[i].copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
+                }
+            }
+            */
+
+
+            /*
+            M->featureModel->cropDialog->lblImage->setPixmap(
+                    QPixmap::fromImage(QImage(M->imageFrames[2].crops[0].data,
+                                              M->imageFrames[2].crops[0].cols,
+                                              M->imageFrames[2].crops[0].rows,
+                                              QImage::Format_BGR888)));
+            */
+        }
+        M->featureModel->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, QImage::Format_BGR888)));
+
+        for (size_t i = 0; i < M->imageFrames[2].result.size(); i++) {
+            DETECTBOX box = M->imageFrames[2].result[i].second;
+            cv::Rect rect = cv::Rect(box[0], box[1], box[2], box[3]);
+            cv::rectangle(M->imageFrames[2].image, rect, cv::Scalar(255, 0, 0), 2);
+            cv::putText(M->imageFrames[2].image, QString::number(M->imageFrames[2].result[i].first).toStdString(), cv::Point(rect.x, rect.y),
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+
+        }
+    }
 
     //rectangle(M->imageFrames[2].image, Rect(150, 150, 100, 100), Scalar(0, 0, 255), 2);
     finished = true;
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    cout << "runner 2 elapsed time: " << elapsed << endl;
+    std::cout << "elasped 2 : " << elapsed << std::endl;
 }

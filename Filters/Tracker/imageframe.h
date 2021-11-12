@@ -15,6 +15,7 @@ class fbox {
 
 public:
     fbox(const bbox_t& bbox);
+    fbox(const DETECTBOX& box);
     bbox_t to_bbox() const;
 
     float x2();
@@ -38,6 +39,7 @@ public:
     std::vector<fbox> detections;
     std::vector<cv::Mat> crops;
     std::vector<std::vector<float>> features;
+    std::vector<RESULT_DATA> result;
 
 };
 

@@ -24,26 +24,37 @@ FeatureModel::FeatureModel(QMainWindow *parent) : Panel(parent)
     loadModel->setMaximumWidth(loadModel->fontMetrics().boundingRect(loadModel->text()).width() * 1.5);
     connect(loadModel, SIGNAL(clicked()), this, SLOT(load()));
 
+    QPushButton *showCrops = new QPushButton("Crops");
+    connect(showCrops, SIGNAL(clicked()), this, SLOT(showCrops()));
+    //connect(showCrops, SIGNAL(clicked()), mainWindow, SLOT(launchCropDialog()));
+
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(savedModelSetter,  0, 0, 1, 4);
     layout->addWidget(lbl00,             1, 0, 1, 1);
     layout->addWidget(spinPctGpuMem,     1, 1, 1, 1);
+    layout->addWidget(showCrops,         1, 2, 1, 1);
     layout->addWidget(loadModel,         1, 3, 1, 1);
     setLayout(layout);
 
-    loader = new FeatureModelLoader(this);
     waitBox = new WaitBox(mainWindow);
-    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
+    //loader = new FeatureModelLoader(this);
+    //waitBox = new WaitBox(mainWindow);
+    //connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
     //connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
+
+    cropDialog = new CropDialog(mainWindow, this);
+}
+
+void FeatureModel::showCrops()
+{
+    cropDialog->show();
 }
 
 bool FeatureModel::infer(ImageFrame* frame)
 {
     int ndims = 4;
     int batch_size = frame->crops.size();
-    std::cout << "batch_size: " << batch_size << std::endl;
-    std::cout << "rows: " << crop_height << " cols: " << crop_width << " chs: " << num_channels << std::endl;
-    int64_t dims[] {batch_size, crop_height, crop_width, num_channels};
+    int64_t dims[] { batch_size, crop_height, crop_width, num_channels };
     int crop_size = crop_height * crop_width * num_channels;
     size_t ndata = crop_size * batch_size;
 
@@ -88,7 +99,11 @@ void FeatureModel::load()
 {
     //load(savedModelSetter->directory, (spinPctGpuMem->value() / (float)100));
     std::cout << "FeatuerModel::load" << std::endl;
-    QThreadPool::globalInstance()->tryStart(loader);
+    loader = new FeatureModelLoader(this);
+    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
+    connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
+    //QThreadPool::globalInstance()->tryStart(loader);
+    QThreadPool::globalInstance()->start(loader);
     waitBox->exec();
 
 }
@@ -202,11 +217,28 @@ FeatureModel::~FeatureModel()
 FeatureModelLoader::FeatureModelLoader(QObject *featureModel)
 {
     this->featureModel = featureModel;
-    setAutoDelete(false);
+    //setAutoDelete(false);
 }
 
 void FeatureModelLoader::run()
 {
     FM->load(FM->savedModelDir, FM->pct_gpu_mem);
     emit done(0);
+}
+
+CropDialog::CropDialog(QMainWindow *parent, QObject *featureModel) : PanelDialog(parent)
+{
+    this->featureModel = featureModel;
+    setWindowTitle("Crop Dialog");
+    lblImage = new QLabel();
+    lblImage->setMinimumWidth(640);
+    lblImage->setMinimumHeight(1024);
+    QGridLayout *panelLayout = new QGridLayout();
+    panelLayout->addWidget(lblImage,   0, 0, 1, 1);
+    panel = new Panel(mainWindow);
+    panel->setLayout(panelLayout);
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->addWidget(panel);
+    setLayout(layout);
+
 }

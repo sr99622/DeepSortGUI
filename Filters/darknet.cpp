@@ -314,8 +314,6 @@ DarknetModel::DarknetModel(QMainWindow *parent, QObject *darknet) : QObject(pare
     mainWindow = parent;
     this->darknet = darknet;
     waitBox = new WaitBox(mainWindow);
-    loader = new DarknetLoader(this);
-    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
     connect(this, SIGNAL(msg(const QString&)), mainWindow, SLOT(msg(const QString&)));
 }
 
@@ -346,11 +344,13 @@ void DarknetModel::initialize(QString cfg_file, QString weights_file, QString na
         return;
     }
 
+    loader = new DarknetLoader(this);
+    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
+    connect(loader, SIGNAL(done(int)), darknet, SLOT(loaderCallback(int)));
     loader->cfg_file = cfg_file.toStdString();
     loader->weights_file = weights_file.toStdString();
     loader->gpu_id = gpu_id;
-    connect(loader, SIGNAL(done(int)), darknet, SLOT(loaderCallback(int)));
-    QThreadPool::globalInstance()->tryStart(loader);
+    QThreadPool::globalInstance()->start(loader);
     waitBox->exec();
 }
 

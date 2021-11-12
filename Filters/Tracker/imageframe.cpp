@@ -55,6 +55,7 @@ void ImageFrame::clear()
     features.clear();
     crops.clear();
     detections.clear();
+    result.clear();
 }
 
 ImageFrame::~ImageFrame()
@@ -69,6 +70,14 @@ fbox::fbox(const bbox_t& bbox)
     w = (float)bbox.w;
     h = (float)bbox.h;
     confidence = bbox.prob;
+}
+
+fbox::fbox(const DETECTBOX& box)
+{
+    x = (float)box[0];
+    y = (float)box[1];
+    w = (float)box[2];
+    h = (float)box[3];
 }
 
 float fbox::x2()

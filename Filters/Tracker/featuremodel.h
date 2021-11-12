@@ -14,6 +14,18 @@
 #include "Utilities/panel.h"
 #include "Utilities/directorysetter.h"
 #include "Utilities/waitbox.h"
+#include "Utilities/paneldialog.h"
+
+class CropDialog : public PanelDialog
+{
+    Q_OBJECT
+
+public:
+    CropDialog(QMainWindow *parent, QObject *featureModel);
+
+    QLabel *lblImage;
+    QObject *featureModel;
+};
 
 class FeatureModelLoader : public QObject, public QRunnable
 {
@@ -76,11 +88,14 @@ public:
     WaitBox *waitBox;
     bool loading;
 
+    CropDialog *cropDialog;
+
 public slots:
     void setSavedModelDir(const QString&);
     void pctGpuMemChanged(int);
     void loaderCallback(int);
     void load();
+    void showCrops();
 
 };
 
