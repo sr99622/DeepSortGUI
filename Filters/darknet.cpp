@@ -201,7 +201,7 @@ void Darknet::setModelDimensions()
     setDims->setEnabled(false);
 }
 
-QSize Darknet::getModelDimensions()
+QSize Darknet::getModelDimensions() const
 {
     QFile file(cfg->filename);
 

@@ -45,6 +45,11 @@ SOURCES += \
     Ffplay/PacketQueue.cpp \
     Ffplay/VideoState.cpp \
     Ffplay/cmdutils.c \
+    Filters/Counter/alarmpanel.cpp \
+    Filters/Counter/counter.cpp \
+    Filters/Counter/counterframe.cpp \
+    Filters/Counter/countpanel.cpp \
+    Filters/Tester/tester.cpp \
     Filters/Tracker/featuremodel.cpp \
     Filters/Tracker/imageframe.cpp \
     Filters/Tracker/matcher.cpp \
@@ -55,6 +60,7 @@ SOURCES += \
     Filters/filterlistview.cpp \
     Filters/filterpanel.cpp \
     Filters/subpicture.cpp \
+    Models/yolo.cpp \
     Utilities/avexception.cpp \
     Utilities/colorbutton.cpp \
     Utilities/cudaexception.cpp \
@@ -68,12 +74,11 @@ SOURCES += \
     Utilities/numbertextbox.cpp \
     Utilities/panel.cpp \
     Utilities/paneldialog.cpp \
+    Utilities/slider.cpp \
     Utilities/waitbox.cpp \
     Utilities/yuvcolor.cpp \
-    alarmpanel.cpp \
     configpanel.cpp \
     controlpanel.cpp \
-    countpanel.cpp \
     main.cpp \
     mainpanel.cpp \
     mainwindow.cpp \
@@ -122,6 +127,11 @@ HEADERS += \
     Ffplay/VideoState.h \
     Ffplay/cmdutils.h \
     Ffplay/config.h \
+    Filters/Counter/alarmpanel.h \
+    Filters/Counter/counter.h \
+    Filters/Counter/counterframe.h \
+    Filters/Counter/countpanel.h \
+    Filters/Tester/tester.h \
     Filters/Tracker/featuremodel.h \
     Filters/Tracker/imageframe.h \
     Filters/Tracker/matcher.h \
@@ -132,6 +142,7 @@ HEADERS += \
     Filters/filterlistview.h \
     Filters/filterpanel.h \
     Filters/subpicture.h \
+    Models/yolo.h \
     Utilities/avexception.h \
     Utilities/colorbutton.h \
     Utilities/cudaexception.h \
@@ -145,12 +156,11 @@ HEADERS += \
     Utilities/numbertextbox.h \
     Utilities/panel.h \
     Utilities/paneldialog.h \
+    Utilities/slider.h \
     Utilities/waitbox.h \
     Utilities/yuvcolor.h \
-    alarmpanel.h \
     configpanel.h \
     controlpanel.h \
-    countpanel.h \
     mainpanel.h \
     mainwindow.h \
     optionpanel.h \

@@ -26,7 +26,6 @@ FeatureModel::FeatureModel(QMainWindow *parent) : Panel(parent)
 
     QPushButton *showCrops = new QPushButton("Crops");
     connect(showCrops, SIGNAL(clicked()), this, SLOT(showCrops()));
-    //connect(showCrops, SIGNAL(clicked()), mainWindow, SLOT(launchCropDialog()));
 
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(savedModelSetter,  0, 0, 1, 4);
@@ -37,12 +36,7 @@ FeatureModel::FeatureModel(QMainWindow *parent) : Panel(parent)
     setLayout(layout);
 
     waitBox = new WaitBox(mainWindow);
-    //loader = new FeatureModelLoader(this);
-    //waitBox = new WaitBox(mainWindow);
-    //connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
-    //connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
-
-    cropDialog = new CropDialog(mainWindow, this);
+    cropDialog = new CropDialog(mainWindow);
 }
 
 void FeatureModel::showCrops()
@@ -97,12 +91,10 @@ void FeatureModel::loaderCallback(int arg)
 
 void FeatureModel::load()
 {
-    //load(savedModelSetter->directory, (spinPctGpuMem->value() / (float)100));
     std::cout << "FeatuerModel::load" << std::endl;
     loader = new FeatureModelLoader(this);
     connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
     connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
-    //QThreadPool::globalInstance()->tryStart(loader);
     QThreadPool::globalInstance()->start(loader);
     waitBox->exec();
 
@@ -217,7 +209,6 @@ FeatureModel::~FeatureModel()
 FeatureModelLoader::FeatureModelLoader(QObject *featureModel)
 {
     this->featureModel = featureModel;
-    //setAutoDelete(false);
 }
 
 void FeatureModelLoader::run()
@@ -226,9 +217,8 @@ void FeatureModelLoader::run()
     emit done(0);
 }
 
-CropDialog::CropDialog(QMainWindow *parent, QObject *featureModel) : PanelDialog(parent)
+CropDialog::CropDialog(QMainWindow *parent) : PanelDialog(parent)
 {
-    this->featureModel = featureModel;
     setWindowTitle("Crop Dialog");
     lblImage = new QLabel();
     lblImage->setMinimumWidth(640);
@@ -240,5 +230,4 @@ CropDialog::CropDialog(QMainWindow *parent, QObject *featureModel) : PanelDialog
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(panel);
     setLayout(layout);
-
 }

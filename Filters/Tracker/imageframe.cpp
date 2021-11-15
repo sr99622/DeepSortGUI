@@ -29,21 +29,26 @@ void ImageFrame::getCrops()
 
 cv::Mat ImageFrame::getCrop(const cv::Mat& image, fbox* box, const cv::Size& size) const
 {
-    cv::Mat crop;
     float target_aspect = size.width / (float)size.height;
     float new_width = target_aspect * box->h;
     box->x -= (new_width - box->w) / 2;
     box->w = new_width;
 
-    box->x = std::max(box->x, 0.0f);
-    box->y = std::max(box->y, 0.0f);
-    box->w = std::min(box->w, image.cols - 1 - box->x);
-    box->h = std::min(box->h, image.rows - 1 - box->y);
+    box->x = std::min((float)(image.cols - 1), std::max(box->x, 0.0f));
+    box->y = std::min((float)(image.rows - 1), std::max(box->y, 0.0f));
+    box->w = std::max(0.0f, std::min(box->w, image.cols - 1 - box->x));
+    box->h = std::max(0.0f, std::min(box->h, image.rows - 1 - box->y));
 
-    //std::cout << "x1: " << box->x << " y1: " << box->y << " x2: " << box->x + box->w << " y2: " << box->y + box->h << std::endl;
-
-    crop = image(cv::Range(box->y, box->y + box->h), cv::Range(box->x, box->x + box->w));
-    cv::resize(crop, crop, size);
+    cv::Mat crop;
+    try {
+        crop = image(cv::Range(box->y, box->y + box->h), cv::Range(box->x, box->x + box->w));
+        cv::resize(crop, crop, size);
+    }
+    catch (const std::exception& e) {
+        std::cout << "ImageFrame::getCrop exception: " << e.what() << std::endl;
+        std::cout << "x1: " << box->x << " y1: " << box->y << " x2: " << box->x + box->w << " y2: " << box->y + box->h << std::endl;
+        crop = cv::Mat(size.height, size.width, CV_8UC3);
+    }
 
     return crop;
 }

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <tensorflow/c/c_api.h>
+#include <SDL.h>
 
 #include <QMainWindow>
 #include <QObject>
@@ -21,10 +22,10 @@ class CropDialog : public PanelDialog
     Q_OBJECT
 
 public:
-    CropDialog(QMainWindow *parent, QObject *featureModel);
+    CropDialog(QMainWindow *parent);
 
     QLabel *lblImage;
-    QObject *featureModel;
+
 };
 
 class FeatureModelLoader : public QObject, public QRunnable

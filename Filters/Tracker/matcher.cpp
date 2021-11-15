@@ -59,17 +59,12 @@ Matcher::Matcher(QMainWindow *parent)
     runner_0 = new Runner_0(this);
     runner_1 = new Runner_1(this);
     runner_2 = new Runner_2(this);
-    //connect(runner_2, SIGNAL(output(int)), mainWindow, SLOT(updateCropDialog(int)));
 
     std::cout << "cfg->filename: " << darknet->cfg->filename.toStdString() << std::endl;
     std::cout << "weights->filename: " << darknet->weights->filename.toStdString() << std::endl;
     std::cout << "names->filename: " << darknet->names->filename.toStdString() << std::endl;
 
     mytracker = new tracker(txtMaxCosineDistance->floatValue(), txtNNBudget->intValue());
-    //darknet->model->detector = new Detector(cfg_filename, weight_filename);
-
-    //initializeModels();
-
 }
 
 void Matcher::initializeModels()
@@ -178,24 +173,11 @@ void Runner_1::run()
         M->mytracker->predict();
         M->mytracker->update(detections);
 
-        //std::vector<RESULT_DATA> result;
         for (Track& track : M->mytracker->tracks) {
             if (!track.is_confirmed() || track.time_since_update > 1)
                 continue;
             M->imageFrames[1].result.push_back(std::make_pair(track.track_id, track.to_tlwh()));
         }
-
-        /*
-        for (size_t i = 0; i < M->imageFrames[1].result.size(); i++) {
-            DETECTBOX box = M->imageFrames[1].result[i].second;
-            cv::Rect rect = cv::Rect(box[0], box[1], box[2], box[3]);
-            cv::rectangle(M->imageFrames[1].image, rect, cv::Scalar(255, 0, 0), 2);
-            cv::putText(M->imageFrames[1].image, QString::number(M->imageFrames[1].result[i].first).toStdString(), cv::Point(rect.x, rect.y),
-                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
-
-        }
-        */
-
     }
 
     finished = true;
@@ -209,57 +191,21 @@ void Runner_2::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-
-    //emit output(M->imageFrames[2].crops.size());
-
-
-
-
     if (M->imageFrames[2].result.size() > 0) {
-
         cv::Mat image(1024, 640, CV_8UC3);
-        //M->featureModel->cropDialog->lblImage->setText(QString::number(M->imageFrames[2].crops.size()));
-
         size_t max_block = 80;
         size_t loop_end = min(max_block, M->imageFrames[2].result.size());
         for (size_t i = 0; i < loop_end; i++) {
-
             int id = M->imageFrames[2].result[i].first % 80;
             size_t y = id / 10;
             size_t x = id - y * 10;
 
-
             fbox box(M->imageFrames[2].result[i].second);
             cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
             crop.copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
-
-
-        /*
-        for (size_t y = 0; y < 8; y++) {
-            for (size_t x = 0; x < 10; x++) {
-                size_t i = y * 10 + x;
-                if (i < 80 && i < M->imageFrames[2].result.size()) {
-                    int id = M->imageFrames[2].result[i].first % 80;
-
-                    fbox box(M->imageFrames[2].result[i].second);
-                    cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
-                    crop.copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
-
-                    //M->imageFrames[2].crops[i].copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
-                }
-            }
-            */
-
-
-            /*
-            M->featureModel->cropDialog->lblImage->setPixmap(
-                    QPixmap::fromImage(QImage(M->imageFrames[2].crops[0].data,
-                                              M->imageFrames[2].crops[0].cols,
-                                              M->imageFrames[2].crops[0].rows,
-                                              QImage::Format_BGR888)));
-            */
         }
-        M->featureModel->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, QImage::Format_BGR888)));
+
+        M->featureModel->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888)));
 
         for (size_t i = 0; i < M->imageFrames[2].result.size(); i++) {
             DETECTBOX box = M->imageFrames[2].result[i].second;
@@ -267,14 +213,12 @@ void Runner_2::run()
             cv::rectangle(M->imageFrames[2].image, rect, cv::Scalar(255, 0, 0), 2);
             cv::putText(M->imageFrames[2].image, QString::number(M->imageFrames[2].result[i].first).toStdString(), cv::Point(rect.x, rect.y),
                         cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
-
         }
     }
 
-    //rectangle(M->imageFrames[2].image, Rect(150, 150, 100, 100), Scalar(0, 0, 255), 2);
     finished = true;
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    std::cout << "elasped 2 : " << elapsed << std::endl;
+    //std::cout << "elasped 2 : " << elapsed << std::endl;
 }

@@ -1,9 +1,8 @@
 #ifndef FILESETTER_H
 #define FILESETTER_H
 
-#include <QWidget>
 #include <QMainWindow>
-#include <QObject>
+#include <QSettings>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -14,8 +13,12 @@ class FileSetter : public QWidget
 
 public:
     FileSetter(QMainWindow *parent, const QString& labelText, const QString& filter);
+    FileSetter(QMainWindow *parent, const QString& labelText, const QString& filter,
+               QSettings *settings, const QString& settingsKey);
+
+    void setup(QMainWindow *parent, const QString& labelText, const QString& filter);
     void setPath(const QString& path);
-    void setPath();
+    QString path() const;
 
     QLabel *label;
     QLineEdit *text;
@@ -25,6 +28,8 @@ public:
     QString defaultPath;
 
     QMainWindow *mainWindow;
+    QSettings *settings = nullptr;
+    QString settingsKey;
 
 signals:
     void fileSet(const QString&);

@@ -27,6 +27,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QMainWindow>
+#include <QSettings>
 
 class DirectorySetter : public QWidget
 {
@@ -34,8 +35,9 @@ class DirectorySetter : public QWidget
 
 public:
     DirectorySetter(QMainWindow *parent, const QString& labelText);
+    DirectorySetter(QMainWindow *parent, const QString& labelText, QSettings *settings, const QString& settingsKey);
     void setPath(const QString& path);
-    //void trimHeight();
+    QString path() const;
 
     QLabel *label;
     QLineEdit *text;
@@ -43,6 +45,8 @@ public:
     QString directory;
 
     QMainWindow *mainWindow;
+    QSettings *settings = nullptr;
+    QString settingsKey;
 
 signals:
     void directorySet(const QString&);

@@ -49,7 +49,7 @@
 #include "mainpanel.h"
 #include "parameterpanel.h"
 #include "optionpanel.h"
-#include "countpanel.h"
+//#include "countpanel.h"
 #include "configpanel.h"
 
 enum CustomEventCode {
@@ -116,7 +116,7 @@ public:
     ControlPanel *control();
     FilterPanel *filter();
     ParameterPanel *parameter();
-    CountPanel *count();
+    //CountPanel *count();
     QLabel *display();
     DisplayContainer *dc();
 
@@ -144,7 +144,7 @@ public:
     FilterChain *filterChain;
     OptionDialog *optionDialog;
 
-    CountDialog *countDialog;
+    //CountDialog *countDialog;
     Quitter *quitter = nullptr;
     Launcher *launcher;
     QString style;

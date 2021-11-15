@@ -24,16 +24,19 @@
 #include <QGridLayout>
 
 #include "Filters/subpicture.h"
-#include "Filters/darknet.h"
+//#include "Filters/darknet.h"
 #include "Filters/Tracker/matcher.h"
+#include "Filters/Counter/counter.h"
+#include "Filters/Tester/tester.h"
 
 FilterPanel::FilterPanel(QMainWindow *parent) : Panel(parent)
 {
     mainWindow = parent;
 
     filters.push_back(new SubPicture(mainWindow));
-    filters.push_back(new Darknet(mainWindow, "Darknet"));
+    filters.push_back(new Counter(mainWindow));
     filters.push_back(new Matcher(mainWindow));
+    filters.push_back(new Tester(mainWindow));
 
     leftView = new FilterListView;
     leftModel = new FilterListModel;

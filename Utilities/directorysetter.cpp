@@ -44,6 +44,19 @@ DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText)
     setContentsMargins(0, 0, 0, 0);
 }
 
+DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText, QSettings *settings, const QString& settingsKey)
+{
+    ::DirectorySetter(parent, labelText);
+    this->settings = settings;
+    this->settingsKey = settingsKey;
+    setPath(settings->value(settingsKey).toString());
+}
+
+QString DirectorySetter::path() const
+{
+    return directory;
+}
+
 void DirectorySetter::setPath(const QString& path)
 {
     directory = path;
@@ -55,15 +68,9 @@ void DirectorySetter::selectDirectory()
     QString path = QFileDialog::getExistingDirectory(mainWindow, label->text(), directory,
                                                   QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (path.length() > 0) {
-        directory = path;
-        text->setText(directory);
+        setPath(path);
+        if (settings)
+            settings->setValue(settingsKey, directory);
         emit directorySet(directory);
     }
 }
-
-/*
-void DirectorySetter::trimHeight()
-{
-    setMaximumHeight(label->fontMetrics().boundingRect("Xy").height() * 4);
-}
-*/

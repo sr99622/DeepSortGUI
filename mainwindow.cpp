@@ -60,7 +60,7 @@ MainWindow::MainWindow(CommandOptions *co, QWidget *parent) : QMainWindow(parent
     optionDialog = new OptionDialog(this);
     parameterDialog = new ParameterDialog(this);
     filterChain = new FilterChain(this);
-    countDialog = new CountDialog(this);
+    //countDialog = new CountDialog(this);
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     QAction *actOpen = new QAction(tr("&Open"));
@@ -201,8 +201,8 @@ void MainWindow::menuAction(QAction *action)
         if (parameterDialog->isVisible()) parameterDialog->hide(); else parameterDialog->show();
     else if (action->text() == "Messa&ges" || action->shortcut() == QKeySequence(Qt::CTRL | Qt::Key_G))
         if (messageDialog->isVisible()) messageDialog->hide(); else messageDialog->show();
-    else if (action->text() == "&Count" || action->shortcut() == QKeySequence(Qt::CTRL | Qt::Key_C))
-        if (countDialog->isVisible()) countDialog->hide(); else countDialog->show();
+    //else if (action->text() == "&Count" || action->shortcut() == QKeySequence(Qt::CTRL | Qt::Key_C))
+    //    if (countDialog->isVisible()) countDialog->hide(); else countDialog->show();
     else if (action->text() == "&Options")
         optionDialog->show();
     else if (action->text() == "Conf&ig")
@@ -422,10 +422,12 @@ ParameterPanel *MainWindow::parameter()
     return (ParameterPanel*)parameterDialog->panel;
 }
 
+/*
 CountPanel *MainWindow::count()
 {
     return (CountPanel*)countDialog->panel;
 }
+*/
 
 QLabel *MainWindow::display()
 {

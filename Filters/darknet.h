@@ -66,7 +66,7 @@ public:
     void autoSave() override;
 
     QString getName(int obj_id) const;
-    QSize getModelDimensions();
+    QSize getModelDimensions() const;
     DarknetModel *model = nullptr;
     bool loading = false;
 

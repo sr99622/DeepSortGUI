@@ -61,9 +61,6 @@ public:
 
     QObject *matcher;
 
-signals:
-    void output(int);
-
 };
 
 class Matcher : public Filter
@@ -102,10 +99,6 @@ public:
     const QString maxCosineDistanceKey = "Matcher/MaxCosineDistance";
     const QString minConfidenceKey = "Matcher/MinConfidence";
     const QString nmsMaxOverlapKey = "Matcher/NmsMaxOverlap";
-
-    std::string cfg_filename = "C:\\Users\\sr996\\models\\reduced\\ami1\\yolov4.cfg";
-    std::string weight_filename = "C:\\Users\\sr996\\models\\reduced\\ami1\\yolov4.weights";
-    QString saved_model_dir = "C:\\Users\\sr996\\source\\repos\\deep_sort_v2\\saved_model";
 
 public slots:
     void nnBudgetSet();
