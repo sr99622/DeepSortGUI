@@ -24,7 +24,6 @@
 #include <QGridLayout>
 
 #include "Filters/subpicture.h"
-//#include "Filters/darknet.h"
 #include "Filters/Tracker/matcher.h"
 #include "Filters/Counter/counter.h"
 #include "Filters/Tester/tester.h"

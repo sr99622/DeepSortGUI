@@ -36,6 +36,7 @@ class DirectorySetter : public QWidget
 public:
     DirectorySetter(QMainWindow *parent, const QString& labelText);
     DirectorySetter(QMainWindow *parent, const QString& labelText, QSettings *settings, const QString& settingsKey);
+    void setup(QMainWindow *parent, const QString& labelText);
     void setPath(const QString& path);
     QString path() const;
 

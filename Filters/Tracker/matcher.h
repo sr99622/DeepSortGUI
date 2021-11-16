@@ -4,16 +4,12 @@
 #include <QMainWindow>
 #include <QRunnable>
 #include "Filters/filter.h"
-#include "Filters/darknet.h"
+#include "Models/yolo.h"
 #include "imageframe.h"
 #include "featuremodel.h"
+#include "cropdialog.h"
 #include "DeepSort/matching/tracker.h"
 #include "Utilities/numbertextbox.h"
-
-#define args_nn_budget 100
-#define args_max_cosine_distance 0.2
-#define args_min_confidence 0.3
-#define args_nms_max_overlap 1.0
 
 class Runner_0 : public QObject, public QRunnable
 {
@@ -70,15 +66,16 @@ class Matcher : public Filter
 public:
     Matcher(QMainWindow *parent);
     void filter(Frame *vp) override;
-    void autoSave() override;
     bool threadsFinished();
     void initializeModels();
 
     QMainWindow *mainWindow;
 
-    Darknet *darknet;
+    Yolo *yolo;
     FeatureModel *featureModel;
     tracker *mytracker;
+    CropDialog *cropDialog;
+    CropParam *cropParam;
 
     ImageFrame imageFrames[3];
     Runner_0 *runner_0;
@@ -94,17 +91,6 @@ public:
     NumberTextBox *txtMaxCosineDistance;
     NumberTextBox *txtMinConfidence;
     NumberTextBox *txtNmsMaxOverlap;
-
-    const QString nnBudgetKey = "Matcher/NNBudget";
-    const QString maxCosineDistanceKey = "Matcher/MaxCosineDistance";
-    const QString minConfidenceKey = "Matcher/MinConfidence";
-    const QString nmsMaxOverlapKey = "Matcher/NmsMaxOverlap";
-
-public slots:
-    void nnBudgetSet();
-    void maxCosineDistanceSet();
-    void minConfidenceSet();
-    void nmsMaxOverlapSet();
 
 };
 

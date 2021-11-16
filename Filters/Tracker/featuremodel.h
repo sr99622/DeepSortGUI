@@ -7,26 +7,15 @@
 
 #include <QMainWindow>
 #include <QObject>
-#include <QSpinBox>
 #include <QRunnable>
 #include <QThreadPool>
 
 #include "imageframe.h"
+#include "cropdialog.h"
 #include "Utilities/panel.h"
 #include "Utilities/directorysetter.h"
 #include "Utilities/waitbox.h"
-#include "Utilities/paneldialog.h"
-
-class CropDialog : public PanelDialog
-{
-    Q_OBJECT
-
-public:
-    CropDialog(QMainWindow *parent);
-
-    QLabel *lblImage;
-
-};
+#include "Utilities/spinbox.h"
 
 class FeatureModelLoader : public QObject, public QRunnable
 {
@@ -37,8 +26,6 @@ public:
     void run() override;
 
     QObject *featureModel;
-    QString saved_model_dir;
-    double pct_gpu_mem;
 
 signals:
     void done(int);
@@ -53,7 +40,6 @@ public:
     FeatureModel(QMainWindow *parent);
     ~FeatureModel();
 
-    void autoSave() override;
     bool load(const QString& saved_model_dir, double pct_gpu_mem = 0.2);
     bool infer(ImageFrame* frame);
     void clear();
@@ -62,12 +48,7 @@ public:
     static void NoOpDeallocator(void *data, size_t a, void *b) { }
 
     DirectorySetter *savedModelSetter;
-    QSpinBox *spinPctGpuMem;
-
-    QString savedModelDir;
-    double pct_gpu_mem;
-    const QString savedModelKey = "FeatureModel/savedModelDir";
-    const QString pctGpuMemKey = "FeatureModel/pctGpuMemKey";
+    SpinBox *spinPctGpuMem;
 
     bool initialized = false;
     const char *tags = "serve";
@@ -89,14 +70,9 @@ public:
     WaitBox *waitBox;
     bool loading;
 
-    CropDialog *cropDialog;
-
 public slots:
-    void setSavedModelDir(const QString&);
-    void pctGpuMemChanged(int);
     void loaderCallback(int);
     void load();
-    void showCrops();
 
 };
 

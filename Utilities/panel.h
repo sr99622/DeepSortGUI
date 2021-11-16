@@ -9,11 +9,13 @@ class Panel : public QWidget
 
 public:
     Panel(QMainWindow *parent);
+    Panel(QMainWindow *parent, QDialog *dlg);
 
     virtual void autoSave();
     bool changed = false;
 
     QMainWindow *mainWindow;
+    QDialog *dlg;
 
 };
 

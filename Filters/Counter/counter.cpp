@@ -1,21 +1,19 @@
 #include "counter.h"
 #include "mainwindow.h"
 
-#define C ((Counter*)counter)
-
 Counter::Counter(QMainWindow *parent)
 {
     mainWindow = parent;
     name = "Counter";
     panel = new Panel(mainWindow);
-    darknet = new Darknet(mainWindow, "Counter");
-    countPanel = new CountPanel(mainWindow, darknet);
+    yolo = new Yolo(mainWindow, "Counter");
+    countPanel = new CountPanel(mainWindow, yolo);
 
     runner_0 = new CounterRunner_0(this);
     runner_1 = new CounterRunner_1(this);
 
     QGridLayout *layout = new QGridLayout();
-    layout->addWidget(darknet->panel,          0, 0, 1, 4);
+    layout->addWidget(yolo,                    0, 0, 1, 4);
     layout->addWidget(new QLabel("elapsed:"),  1, 2, 1, 1);
     layout->addWidget(runner_0->lblElapsed,    1, 3, 1, 1);
     layout->addWidget(countPanel,              2, 0, 1, 4);
@@ -27,13 +25,13 @@ Counter::Counter(QMainWindow *parent)
 
 void Counter::filter(Frame *vp)
 {
-    if (darknet->model == nullptr) {
-        darknet->loading = true;
-        darknet->model = new DarknetModel(mainWindow, darknet);
-        darknet->model->initialize(darknet->cfg->filename, darknet->weights->filename, darknet->names->filename);
+    if (!yolo->started) {
+        yolo->started = true;
+        yolo->loading = true;
+        yolo->loadModel();
     }
 
-    if (!darknet->loading) {
+    if (!yolo->loading) {
         counterFrames[1] = counterFrames[0];
         counterFrames[0].clear();
         counterFrames[0].image = vp->toMat();
@@ -65,8 +63,8 @@ void CounterRunner_0::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    //QThread::msleep(10);
-    C->counterFrames[0].detections = C->darknet->model->detector->detect(C->counterFrames[0].image);
+    Counter *C = (Counter*)counter;
+    C->counterFrames[0].detections = C->yolo->detector->detect(C->counterFrames[0].image);
 
     finished = true;
 
@@ -79,8 +77,7 @@ void CounterRunner_1::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    //QThread::msleep(10);
-    //C->countPanel->feed(C->counterFrames[1].detections);
+    Counter *C = (Counter*)counter;
     C->countPanel->feed(C->counterFrames[1]);
 
     finished = true;

@@ -61,6 +61,7 @@ public:
     YoloLoader *loader;
     WaitBox *waitBox;
     bool loading;
+    bool started = false;
 
     FileSetter *names;
     FileSetter *cfg;

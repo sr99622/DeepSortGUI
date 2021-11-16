@@ -29,11 +29,11 @@
 #include <QSpinBox>
 #include <QLabel>
 
-class SpinBox : public QSpinBox
+class VSpinBox : public QSpinBox
 {
 
 public:
-    SpinBox(QLineEdit *editor);
+    VSpinBox(QLineEdit *editor);
 
 };
 
@@ -50,9 +50,9 @@ public:
 
     QWidget *cameraPanel;
     QComboBox *comboResolutions;
-    SpinBox *spinFrameRate;
-    SpinBox *spinGovLength;
-    SpinBox *spinBitrate;
+    VSpinBox *spinFrameRate;
+    VSpinBox *spinGovLength;
+    VSpinBox *spinBitrate;
     QLabel *lblResolutions;
     QLabel *lblFrameRate;
     QLabel *lblGovLength;

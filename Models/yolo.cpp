@@ -31,14 +31,12 @@ Yolo::Yolo(QMainWindow *parent, const QString& baseKey) : QWidget(parent)
     layout->addWidget(btnLoad,    4, 5, 1, 1);
     setLayout(layout);
 
-    loader = new YoloLoader(this);
     waitBox = new WaitBox(mainWindow);
-    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
-    connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
 }
 
 void Yolo::loadModel()
 {
+    started = true;
     if (detector != nullptr)
         detector->~Detector();
 
@@ -56,7 +54,10 @@ void Yolo::loadModel()
         return;
     }
 
-    QThreadPool::globalInstance()->tryStart(loader);
+    loader = new YoloLoader(this);
+    connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
+    connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
+    QThreadPool::globalInstance()->start(loader);
     waitBox->exec();
 }
 
@@ -211,7 +212,6 @@ void YoloCfg::setCfg(const QString& arg)
 YoloLoader::YoloLoader(QObject *parent)
 {
     yolo = parent;
-    setAutoDelete(false);
 }
 
 void YoloLoader::run()

@@ -23,6 +23,13 @@
 #define NUMBERTEXTBOX_H
 
 #include <QLineEdit>
+#include <QSettings>
+#include <QLabel>
+
+enum NumberType {
+    INTEGER_NUMBER,
+    FLOAT_NUMBER
+};
 
 class NumberTextBox : public QLineEdit
 {
@@ -30,13 +37,22 @@ class NumberTextBox : public QLineEdit
 
 public:
     NumberTextBox();
+    NumberTextBox(QSettings *settings, const QString& settingsKey, NumberType numberType, const QString& displayName);
     int intValue() const;
     float floatValue() const;
     void setIntValue(int value);
     void setFloatValue(float value);
 
+    NumberType numberType;
+    QSettings *settings;
+    QString settingsKey;
+    QLabel *lbl;
+
 private:
     void keyPressEvent(QKeyEvent *event) override;
+
+public slots:
+    void numberSet();
 
 };
 

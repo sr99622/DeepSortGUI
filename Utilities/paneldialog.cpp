@@ -30,6 +30,15 @@ PanelDialog::PanelDialog(QMainWindow *parent) : QDialog(parent, Qt::WindowSystem
     timer->start(10000);
 }
 
+PanelDialog::PanelDialog(QMainWindow *parent, const QString& settingsKey)  : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+{
+    mainWindow = parent;
+    this->settingsKey = settingsKey;
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(autoSave()));
+    timer->start(10000);
+}
+
 void PanelDialog::keyPressEvent(QKeyEvent *event)
 {
     if (event->modifiers() & Qt::ControlModifier) {

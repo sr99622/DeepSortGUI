@@ -27,6 +27,40 @@ NumberTextBox::NumberTextBox()
     setAlignment(Qt::AlignRight);
 }
 
+NumberTextBox::NumberTextBox(QSettings *settings, const QString& settingsKey, NumberType numberType, const QString& displayName)
+{
+    this->settings = settings;
+    this->settingsKey = settingsKey;
+    this->numberType = numberType;
+    setAlignment(Qt::AlignRight);
+    lbl = new QLabel(displayName);
+    if (settings->contains(settingsKey)) {
+        switch (numberType) {
+        case INTEGER_NUMBER:
+            setText(QString::number(settings->value(settingsKey).toInt()));
+            break;
+        case FLOAT_NUMBER:
+            setText(QString::number(settings->value(settingsKey).toFloat()));
+            break;
+        }
+    }
+    connect(this, SIGNAL(editingFinished()), this, SLOT(numberSet()));
+}
+
+void NumberTextBox::numberSet()
+{
+    if (settings) {
+        switch (numberType) {
+        case INTEGER_NUMBER:
+            settings->setValue(settingsKey, intValue());
+            break;
+        case FLOAT_NUMBER:
+            settings->setValue(settingsKey, floatValue());
+            break;
+        }
+    }
+}
+
 int NumberTextBox::intValue() const
 {
     return text().toInt();

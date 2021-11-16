@@ -45,15 +45,15 @@ SOURCES += \
     Ffplay/PacketQueue.cpp \
     Ffplay/VideoState.cpp \
     Ffplay/cmdutils.c \
-    Filters/Counter/alarmpanel.cpp \
     Filters/Counter/counter.cpp \
     Filters/Counter/counterframe.cpp \
     Filters/Counter/countpanel.cpp \
     Filters/Tester/tester.cpp \
+    Filters/Tracker/cropdialog.cpp \
     Filters/Tracker/featuremodel.cpp \
     Filters/Tracker/imageframe.cpp \
     Filters/Tracker/matcher.cpp \
-    Filters/darknet.cpp \
+    Filters/Tracker/trackerstats.cpp \
     Filters/filter.cpp \
     Filters/filterchain.cpp \
     Filters/filterlistmodel.cpp \
@@ -75,6 +75,7 @@ SOURCES += \
     Utilities/panel.cpp \
     Utilities/paneldialog.cpp \
     Utilities/slider.cpp \
+    Utilities/spinbox.cpp \
     Utilities/waitbox.cpp \
     Utilities/yuvcolor.cpp \
     configpanel.cpp \
@@ -127,15 +128,15 @@ HEADERS += \
     Ffplay/VideoState.h \
     Ffplay/cmdutils.h \
     Ffplay/config.h \
-    Filters/Counter/alarmpanel.h \
     Filters/Counter/counter.h \
     Filters/Counter/counterframe.h \
     Filters/Counter/countpanel.h \
     Filters/Tester/tester.h \
+    Filters/Tracker/cropdialog.h \
     Filters/Tracker/featuremodel.h \
     Filters/Tracker/imageframe.h \
     Filters/Tracker/matcher.h \
-    Filters/darknet.h \
+    Filters/Tracker/trackerstats.h \
     Filters/filter.h \
     Filters/filterchain.h \
     Filters/filterlistmodel.h \
@@ -157,6 +158,7 @@ HEADERS += \
     Utilities/panel.h \
     Utilities/paneldialog.h \
     Utilities/slider.h \
+    Utilities/spinbox.h \
     Utilities/waitbox.h \
     Utilities/yuvcolor.h \
     configpanel.h \

@@ -6,6 +6,7 @@
 #include <QTableWidget>
 #include <QSplitter>
 #include <QRadioButton>
+#include <QCheckBox>
 #include <QGroupBox>
 #include <QTimer>
 #include <QFile>
@@ -13,9 +14,9 @@
 #include "Utilities/paneldialog.h"
 #include "Utilities/directorysetter.h"
 #include "Utilities/numbertextbox.h"
-#include "Filters/darknet.h"
+#include "Utilities/yuvcolor.h"
+#include "Models/yolo.h"
 #include "Filters/Counter/counterframe.h"
-#include "alarmpanel.h"
 
 class ObjDrawer : public QWidget
 {
@@ -48,30 +49,12 @@ public slots:
 
 };
 
-class AlarmSetter : public QWidget
-{
-    Q_OBJECT
-
-public:
-    AlarmSetter(QMainWindow *parent, int obj_id);
-
-    QMainWindow *mainWindow;
-    QPushButton *button;
-    int obj_id;
-
-    AlarmDialog *alarmDialog;
-
-public slots:
-    void buttonPressed();
-
-};
-
 class CountPanel : public Panel
 {
     Q_OBJECT
 
 public:
-    CountPanel(QMainWindow *parent, Darknet *darknet);
+    CountPanel(QMainWindow *parent, Yolo *yolo);
     ~CountPanel();
     void autoSave() override;
     int indexForSums(int obj_id);
@@ -93,7 +76,7 @@ public:
     QCheckBox *saveOn;
     QTimer *timer;
     QFile *file = nullptr;
-    Darknet *darknet;
+    Yolo *yolo;
 
     const QString headerKey   = "CountPanel/header";
     const QString hSplitKey   = "CountPanel/hSplit";
@@ -102,15 +85,14 @@ public:
     const QString groupBoxKey = "CountPanel/groupBox";
     const QString saveOnKey   = "CountPanel/saveOn";
 
-    std::vector<pair<int, int>> sums;
-    std::vector<pair<int, std::vector<int>>> counts;
+    std::vector<std::pair<int, int>> sums;
+    std::vector<std::pair<int, std::vector<int>>> counts;
     QMutex mutex;
 
 public slots:
     void itemChanged(QListWidgetItem*);
     void itemClicked(QListWidgetItem*);
     void hSplitMoved(int, int);
-    //void feed(const std::vector<bbox_t>&);
     void feed(const CounterFrame&);
     void headerChanged(int, int, int);
     void setDir(const QString&);
@@ -127,7 +109,7 @@ class CountDialog : public PanelDialog
     Q_OBJECT
 
 public:
-    CountDialog(QMainWindow *parent, Darknet *darknet);
+    CountDialog(QMainWindow *parent, Yolo *yolo);
 
 };
 

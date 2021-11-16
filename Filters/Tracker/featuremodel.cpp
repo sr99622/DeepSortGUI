@@ -1,47 +1,23 @@
 #include "featuremodel.h"
 #include "mainwindow.h"
 
-#define FM ((FeatureModel*)featureModel)
-
 FeatureModel::FeatureModel(QMainWindow *parent) : Panel(parent)
 {
-    savedModelSetter = new DirectorySetter(mainWindow, "Saved Model");
-    if (MW->settings->contains(savedModelKey)) {
-        savedModelDir = MW->settings->value(savedModelKey).toString();
-        savedModelSetter->setPath(savedModelDir);
-    }
-    connect(savedModelSetter, SIGNAL(directorySet(const QString&)), this, SLOT(setSavedModelDir(const QString&)));
-
-    QLabel *lbl00 = new QLabel("% GPU Mem");
-    spinPctGpuMem = new QSpinBox();
-    if (MW->settings->contains(pctGpuMemKey)) {
-        pct_gpu_mem = MW->settings->value(pctGpuMemKey).toDouble();
-        spinPctGpuMem->setValue((int)(pct_gpu_mem * 100));
-    }
-    connect(spinPctGpuMem, SIGNAL(valueChanged(int)), this, SLOT(pctGpuMemChanged(int)));
+    savedModelSetter = new DirectorySetter(mainWindow, "Saved Model", MW->settings, "FeatureModel/saveModelSetter");
+    spinPctGpuMem = new SpinBox(MW->settings, "FeatureModel/spinPctGpuMem", "% GPU Mem");
 
     QPushButton *loadModel = new QPushButton("Load");
     loadModel->setMaximumWidth(loadModel->fontMetrics().boundingRect(loadModel->text()).width() * 1.5);
     connect(loadModel, SIGNAL(clicked()), this, SLOT(load()));
 
-    QPushButton *showCrops = new QPushButton("Crops");
-    connect(showCrops, SIGNAL(clicked()), this, SLOT(showCrops()));
-
     QGridLayout *layout = new QGridLayout();
-    layout->addWidget(savedModelSetter,  0, 0, 1, 4);
-    layout->addWidget(lbl00,             1, 0, 1, 1);
-    layout->addWidget(spinPctGpuMem,     1, 1, 1, 1);
-    layout->addWidget(showCrops,         1, 2, 1, 1);
-    layout->addWidget(loadModel,         1, 3, 1, 1);
+    layout->addWidget(savedModelSetter,    0, 0, 1, 4);
+    layout->addWidget(spinPctGpuMem->lbl,  1, 0, 1, 1);
+    layout->addWidget(spinPctGpuMem,       1, 1, 1, 1);
+    layout->addWidget(loadModel,           1, 3, 1, 1);
     setLayout(layout);
 
     waitBox = new WaitBox(mainWindow);
-    cropDialog = new CropDialog(mainWindow);
-}
-
-void FeatureModel::showCrops()
-{
-    cropDialog->show();
 }
 
 bool FeatureModel::infer(ImageFrame* frame)
@@ -72,10 +48,8 @@ bool FeatureModel::infer(ImageFrame* frame)
     for (int i = 0; i < batch_size; i++) {
         std::vector<float> feature;
         for (int j = 0; j < feature_size; j++) {
-            //cout << "batch_no: " << i << " index: " << j << " value: " << sig[i * feature_size + j] << endl;
             feature.push_back(sig[i * feature_size + j]);
         }
-        //frames[current_index].features.push_back(feature);
         frame->features.push_back(feature);
     }
 
@@ -91,7 +65,6 @@ void FeatureModel::loaderCallback(int arg)
 
 void FeatureModel::load()
 {
-    std::cout << "FeatuerModel::load" << std::endl;
     loader = new FeatureModelLoader(this);
     connect(loader, SIGNAL(done(int)), waitBox, SLOT(done(int)));
     connect(loader, SIGNAL(done(int)), this, SLOT(loaderCallback(int)));
@@ -130,8 +103,8 @@ bool FeatureModel::load(const QString& saved_model_dir, double pct_gpu_mem)
     InputValues = (TF_Tensor **)malloc(sizeof(TF_Tensor *) * NumInputs);
     OutputValues = (TF_Tensor **)malloc(sizeof(TF_Tensor *) * NumOutputs);
 
-    Input[0] = {TF_GraphOperationByName(Graph, "images"), 0};
-    Output[0] = {TF_GraphOperationByName(Graph, "features"), 0};
+    Input[0] = { TF_GraphOperationByName(Graph, "images"), 0 };
+    Output[0] = { TF_GraphOperationByName(Graph, "features"), 0 };
 
     cv::Mat dummy(crop_height, crop_width, CV_8UC3, cv::Scalar(0,0,0));
     ImageFrame frame;
@@ -172,23 +145,6 @@ TF_SessionOptions* FeatureModel::CreateSessionOptions(double percentage)
     return options;
 }
 
-void FeatureModel::setSavedModelDir(const QString& arg)
-{
-    savedModelDir = arg;
-    MW->settings->setValue(savedModelKey, savedModelDir);
-}
-
-void FeatureModel::pctGpuMemChanged(int arg)
-{
-    pct_gpu_mem = arg / (double)100;
-    MW->settings->setValue(pctGpuMemKey, pct_gpu_mem);
-}
-
-void FeatureModel::autoSave()
-{
-
-}
-
 void FeatureModel::clear()
 {
     if (Graph)        TF_DeleteGraph(Graph);
@@ -213,21 +169,8 @@ FeatureModelLoader::FeatureModelLoader(QObject *featureModel)
 
 void FeatureModelLoader::run()
 {
-    FM->load(FM->savedModelDir, FM->pct_gpu_mem);
+    FeatureModel *FM = (FeatureModel*)featureModel;
+    FM->load(FM->savedModelSetter->path(), FM->spinPctGpuMem->value()/(float)100);
     emit done(0);
 }
 
-CropDialog::CropDialog(QMainWindow *parent) : PanelDialog(parent)
-{
-    setWindowTitle("Crop Dialog");
-    lblImage = new QLabel();
-    lblImage->setMinimumWidth(640);
-    lblImage->setMinimumHeight(1024);
-    QGridLayout *panelLayout = new QGridLayout();
-    panelLayout->addWidget(lblImage,   0, 0, 1, 1);
-    panel = new Panel(mainWindow);
-    panel->setLayout(panelLayout);
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(panel);
-    setLayout(layout);
-}

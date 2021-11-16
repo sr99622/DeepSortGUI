@@ -26,7 +26,7 @@
 #include <QGridLayout>
 #include <QThreadPool>
 
-SpinBox::SpinBox(QLineEdit *editor)
+VSpinBox::VSpinBox(QLineEdit *editor)
 {
     setLineEdit(editor);
 }
@@ -38,13 +38,13 @@ VideoTab::VideoTab(QWidget *parent)
     comboResolutions = new QComboBox();
 
     QLineEdit *textBitrate = new QLineEdit();
-    spinBitrate = new SpinBox(textBitrate);
+    spinBitrate = new VSpinBox(textBitrate);
 
     QLineEdit *textFrameRate = new QLineEdit();
-    spinFrameRate = new SpinBox(textFrameRate);
+    spinFrameRate = new VSpinBox(textFrameRate);
 
     QLineEdit *textGovLength = new QLineEdit();
-    spinGovLength = new SpinBox(textGovLength);
+    spinGovLength = new VSpinBox(textGovLength);
 
     lblResolutions = new QLabel("Resolution");
     lblFrameRate = new QLabel("Frame Rate");

@@ -4,9 +4,9 @@
 #include <QMainWindow>
 #include <QRunnable>
 #include "Filters/filter.h"
-#include "Filters/darknet.h"
 #include "Filters/Counter/countpanel.h"
 #include "Filters/Counter/counterframe.h"
+#include "Models/yolo.h"
 
 class CounterRunner_0 : public QObject, public QRunnable
 {
@@ -53,7 +53,7 @@ public:
     bool threadsFinished();
 
     QMainWindow *mainWindow;
-    Darknet *darknet;
+    Yolo *yolo;
     CountPanel *countPanel;
 
     CounterFrame counterFrames[2];

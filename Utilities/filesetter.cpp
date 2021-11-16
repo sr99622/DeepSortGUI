@@ -4,8 +4,6 @@
 #include <QGridLayout>
 #include <iostream>
 
-using namespace std;
-
 FileSetter::FileSetter(QMainWindow *parent, const QString& labelText, const QString& filter)
 {
     setup(parent, labelText, filter);

@@ -26,6 +26,19 @@
 
 DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText)
 {
+    setup(parent, labelText);
+}
+
+DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText, QSettings *settings, const QString& settingsKey)
+{
+    setup(parent, labelText);
+    this->settings = settings;
+    this->settingsKey = settingsKey;
+    setPath(settings->value(settingsKey).toString());
+}
+
+void DirectorySetter::setup(QMainWindow *parent, const QString& labelText)
+{
     mainWindow = parent;
     label = new QLabel(labelText);
     text = new QLineEdit();
@@ -34,22 +47,13 @@ DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText)
     connect(button, SIGNAL(clicked()), this, SLOT(selectDirectory()));
 
     QGridLayout *layout = new QGridLayout;
-    layout->setContentsMargins(0, 0, 0, 0);
     if (label->text() != "")
         layout->addWidget(label,  0, 0, 1, 1);
-    layout->addWidget(text,   0, 1, 1, 1);
-    layout->addWidget(button, 0, 2, 1, 1);
+    layout->addWidget(text,       0, 1, 1, 1);
+    layout->addWidget(button,     0, 2, 1, 1);
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
     setContentsMargins(0, 0, 0, 0);
-}
-
-DirectorySetter::DirectorySetter(QMainWindow *parent, const QString& labelText, QSettings *settings, const QString& settingsKey)
-{
-    ::DirectorySetter(parent, labelText);
-    this->settings = settings;
-    this->settingsKey = settingsKey;
-    setPath(settings->value(settingsKey).toString());
 }
 
 QString DirectorySetter::path() const

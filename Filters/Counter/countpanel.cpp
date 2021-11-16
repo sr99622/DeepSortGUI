@@ -1,11 +1,10 @@
 #include "countpanel.h"
 #include "mainwindow.h"
 
-CountPanel::CountPanel(QMainWindow *parent, Darknet *darknet) : Panel(parent)
+CountPanel::CountPanel(QMainWindow *parent, Yolo *yolo) : Panel(parent)
 {
-    this->darknet = darknet;
-    connect(darknet, SIGNAL(send(std::vector<bbox_t>*)), this, SLOT(feed(std::vector<bbox_t>*)));
-    connect(darknet, SIGNAL(namesSet()), this, SLOT(setNames()));
+    this->yolo = yolo;
+    connect(yolo, SIGNAL(namesSet()), this, SLOT(setNames()));
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
@@ -119,8 +118,8 @@ void CountPanel::setNames() {
     list->clear();
     names.clear();
 
-    for (int i = 0; i < darknet->obj_names.size(); i++)
-        names.push_back(darknet->obj_names[i].c_str());
+    for (size_t i = 0; i < yolo->obj_names.size(); i++)
+        names.push_back(yolo->obj_names[i].c_str());
 
     list->addItems(names);
     for (int i = 0; i < list->count(); i++) {
@@ -163,7 +162,6 @@ void CountPanel::feed(const CounterFrame& frame)
 
             int count = sum.second;
 
-            ((AlarmSetter*)table->cellWidget(row, 3))->alarmDialog->getPanel()->feed(count);
             if (saveOn->isChecked())
                 addCount(sum.first, sum.second);
         }
@@ -174,7 +172,6 @@ void CountPanel::feed(const CounterFrame& frame)
         if (indexForSums(obj_id) < 0) {
             table->item(i, 1)->setText("0");
 
-            ((AlarmSetter*)table->cellWidget(i, 3))->alarmDialog->getPanel()->feed(0);
             if (saveOn->isChecked())
                 addCount(obj_id, 0);
         }
@@ -390,14 +387,8 @@ void CountPanel::addNewLine(int obj_id)
         objDrawer->show = true;
     }
     list->item(objDrawer->obj_id)->setCheckState(Qt::Checked);
-    connect(objDrawer, SIGNAL(shown(int, const YUVColor&)), darknet, SLOT(draw(int, const YUVColor&)));
-    connect(objDrawer, SIGNAL(colored(int, const YUVColor&)), darknet, SLOT(draw(int, const YUVColor&)));
     table->setCellWidget(table->rowCount()-1, 2, objDrawer);
-    if (objDrawer->show)
-        darknet->obj_drawn[objDrawer->obj_id] = objDrawer->color;
     MW->settings->setValue(objDrawer->getSettingsKey(), objDrawer->saveState());
-    AlarmSetter *setter = new AlarmSetter(mainWindow, obj_id);
-    table->setCellWidget(table->rowCount()-1, 3, setter);
 }
 
 void CountPanel::removeLine(int obj_id)
@@ -431,32 +422,6 @@ void CountPanel::itemClicked(QListWidgetItem *item)
         item->setCheckState(Qt::Checked);
 
     itemChanged(item);
-}
-
-AlarmSetter::AlarmSetter(QMainWindow *parent, int obj_id)
-{
-    mainWindow = parent;
-    this->obj_id = obj_id;
-    button = new QPushButton("...");
-    button->setMaximumWidth(30);
-    button->setMaximumHeight(20);
-    QGridLayout *layout = new QGridLayout();
-    layout->addWidget(button, 0, 0, 1, 1);
-    layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
-
-    alarmDialog = new AlarmDialog(mainWindow, obj_id);
-
-    connect(button, SIGNAL(clicked()), this, SLOT(buttonPressed()));
-}
-
-void AlarmSetter::buttonPressed()
-{
-    /*
-    QString obj_name = MW->count()->names[obj_id];
-    alarmDialog->setWindowTitle(QString("Alarm Configuration - ") + obj_name);
-    alarmDialog->show();
-    */
 }
 
 ObjDrawer::ObjDrawer(QMainWindow *parent, int obj_id)
@@ -543,10 +508,10 @@ void ObjDrawer::btnColorClicked()
     }
 }
 
-CountDialog::CountDialog(QMainWindow *parent, Darknet *darknet) : PanelDialog(parent)
+CountDialog::CountDialog(QMainWindow *parent, Yolo *yolo) : PanelDialog(parent)
 {
     setWindowTitle("Counter");
-    panel = new CountPanel(mainWindow, darknet);
+    panel = new CountPanel(mainWindow, yolo);
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(panel);
     setLayout(layout);

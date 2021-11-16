@@ -1,32 +1,24 @@
 #include "matcher.h"
 #include "mainwindow.h"
 
-#define M ((Matcher*)matcher)
-
 Matcher::Matcher(QMainWindow *parent)
 {
     mainWindow = parent;
     name = "Tracker";
     panel = new Panel(mainWindow);
-    darknet = new Darknet(mainWindow, "Matcher");
+    yolo = new Yolo(mainWindow, "Matcher");
     featureModel = new FeatureModel(mainWindow);
+    cropDialog = new CropDialog(mainWindow);
+    cropParam = new CropParam(mainWindow, cropDialog);
 
-    QLabel *lbl00 = new QLabel("nn budget");
-    txtNNBudget = new NumberTextBox();
-    txtNNBudget->setIntValue(MW->settings->value(nnBudgetKey, 100).toInt());
-    connect(txtNNBudget, SIGNAL(editingFinished()), this, SLOT(nnBudgetSet()));
-    QLabel *lbl01 = new QLabel("max cosine dist");
-    txtMaxCosineDistance = new NumberTextBox();
-    txtMaxCosineDistance->setFloatValue(MW->settings->value(maxCosineDistanceKey, 0.2f).toFloat());
-    connect(txtMaxCosineDistance, SIGNAL(editingFinished()), this, SLOT(maxCosineDistanceSet()));
-    QLabel *lbl02 = new QLabel("min confidence");
-    txtMinConfidence = new NumberTextBox();
-    txtMinConfidence->setFloatValue(MW->settings->value(minConfidenceKey, 0.3f).toFloat());
-    connect(txtMinConfidence, SIGNAL(editingFinished()), this, SLOT(minConfidenceSet()));
-    QLabel *lbl03 = new QLabel("nms max overlap");
-    txtNmsMaxOverlap = new NumberTextBox();
-    txtNmsMaxOverlap->setFloatValue(MW->settings->value(nmsMaxOverlapKey, 1.0f).toFloat());
-    connect(txtNmsMaxOverlap, SIGNAL(editingFinished()), this, SLOT(nmsMaxOverlapSet()));
+    txtNNBudget = new NumberTextBox(MW->settings, "Matcher/txtNNBudget", INTEGER_NUMBER, "nn budget");
+    if (txtNNBudget->text().length() == 0) txtNNBudget->setIntValue(100);
+    txtMaxCosineDistance = new NumberTextBox(MW->settings, "Matcher/txtMaxCosineDistance", FLOAT_NUMBER, "max cosine dist");
+    if (txtMaxCosineDistance->text().length() == 0) txtMaxCosineDistance->setFloatValue(0.2f);
+    txtMinConfidence = new NumberTextBox(MW->settings, "Matcher/txtMinConfidence", FLOAT_NUMBER, "min confidence");
+    if (txtMinConfidence->text().length() == 0) txtMinConfidence->setFloatValue(0.3f);
+    txtNmsMaxOverlap = new NumberTextBox(MW->settings, "Matcher/txtNmsMaxOverlap", FLOAT_NUMBER, "nms max overlap");
+    if (txtNmsMaxOverlap->text().length() == 0) txtNmsMaxOverlap->setFloatValue(1.0f);
 
     elapsed_0 = new QLabel();
     QLabel *lbl04 = new QLabel("time elpased:");
@@ -38,52 +30,47 @@ Matcher::Matcher(QMainWindow *parent)
     QLabel *lbl07 = new QLabel("count:");
 
     QGridLayout *layout = new QGridLayout();
-    layout->addWidget(darknet->panel,       0, 0, 1, 4);
-    layout->addWidget(lbl07,                1, 0, 1, 1, Qt::AlignRight);
-    layout->addWidget(detection_count,      1, 1, 1, 1);
-    layout->addWidget(lbl04,                1, 2, 1, 1, Qt::AlignRight);
-    layout->addWidget(elapsed_0,            1, 3, 1, 1);
-    layout->addWidget(featureModel,         2, 0, 1, 4);
-    layout->addWidget(lbl00,                3, 0, 1, 1);
-    layout->addWidget(txtNNBudget,          3, 1, 1, 1);
-    layout->addWidget(lbl01,                3, 2, 1, 1);
-    layout->addWidget(txtMaxCosineDistance, 3, 3, 1, 1);
-    layout->addWidget(lbl02,                4, 0, 1, 1);
-    layout->addWidget(txtMinConfidence,     4, 1, 1, 1);
-    layout->addWidget(lbl03,                4, 2, 1, 1);
-    layout->addWidget(txtNmsMaxOverlap,     4, 3, 1, 1);
-    layout->addWidget(lbl05,                5, 2, 1, 1, Qt::AlignRight);
-    layout->addWidget(elapsed_1,            5, 3, 1, 1);
+    layout->addWidget(yolo,                       0, 0, 1, 4);
+    layout->addWidget(lbl07,                      1, 0, 1, 1, Qt::AlignRight);
+    layout->addWidget(detection_count,            1, 1, 1, 1);
+    layout->addWidget(lbl04,                      1, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(elapsed_0,                  1, 3, 1, 1);
+    layout->addWidget(featureModel,               2, 0, 1, 4);
+    layout->addWidget(txtNNBudget->lbl,           3, 0, 1, 1);
+    layout->addWidget(txtNNBudget,                3, 1, 1, 1);
+    layout->addWidget(txtMaxCosineDistance->lbl,  3, 2, 1, 1);
+    layout->addWidget(txtMaxCosineDistance,       3, 3, 1, 1);
+    layout->addWidget(txtMinConfidence->lbl,      4, 0, 1, 1);
+    layout->addWidget(txtMinConfidence,           4, 1, 1, 1);
+    layout->addWidget(txtNmsMaxOverlap->lbl,      4, 2, 1, 1);
+    layout->addWidget(txtNmsMaxOverlap,           4, 3, 1, 1);
+    layout->addWidget(lbl05,                      5, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(elapsed_1,                  5, 3, 1, 1);
+    layout->addWidget(cropParam,                  6, 0, 1, 4);
     panel->setLayout(layout);
 
     runner_0 = new Runner_0(this);
     runner_1 = new Runner_1(this);
     runner_2 = new Runner_2(this);
 
-    std::cout << "cfg->filename: " << darknet->cfg->filename.toStdString() << std::endl;
-    std::cout << "weights->filename: " << darknet->weights->filename.toStdString() << std::endl;
-    std::cout << "names->filename: " << darknet->names->filename.toStdString() << std::endl;
-
     mytracker = new tracker(txtMaxCosineDistance->floatValue(), txtNNBudget->intValue());
 }
 
 void Matcher::initializeModels()
 {
-    darknet->model = new DarknetModel(mainWindow, darknet);
-    darknet->model->initialize(darknet->cfg->filename, darknet->weights->filename, darknet->names->filename);
-
-    //featureModel->load();
-    featureModel->load(featureModel->savedModelDir, featureModel->pct_gpu_mem);
+    yolo->loadModel();
+    featureModel->load(featureModel->savedModelSetter->path(), featureModel->spinPctGpuMem->value()/(float)100);
 }
 
 void Matcher::filter(Frame *vp)
 {
-    if (darknet->model == nullptr) {
-        darknet->loading = true;
+    if (!yolo->started) {
+        yolo->started = true;
+        yolo->loading = true;
         initializeModels();
     }
 
-    if (!darknet->loading) {
+    if (!yolo->loading) {
         imageFrames[2] = imageFrames[1];
         imageFrames[1] = imageFrames[0];
         imageFrames[0].clear();
@@ -104,31 +91,6 @@ void Matcher::filter(Frame *vp)
     }
 }
 
-void Matcher::nnBudgetSet()
-{
-    MW->settings->setValue(nnBudgetKey, txtNNBudget->intValue());
-}
-
-void Matcher::maxCosineDistanceSet()
-{
-    MW->settings->setValue(maxCosineDistanceKey, txtMaxCosineDistance->floatValue());
-}
-
-void Matcher::minConfidenceSet()
-{
-    MW->settings->setValue(minConfidenceKey, txtMinConfidence->floatValue());
-}
-
-void Matcher::nmsMaxOverlapSet()
-{
-    MW->settings->setValue(nmsMaxOverlapKey, txtNmsMaxOverlap->floatValue());
-}
-
-void Matcher::autoSave()
-{
-    darknet->autoSave();
-}
-
 bool Matcher::threadsFinished()
 {
     return runner_0->finished && runner_1->finished && runner_2->finished;
@@ -138,7 +100,8 @@ void Runner_0::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<bbox_t> detections = M->darknet->model->detector->detect(M->imageFrames[0].image);
+    Matcher *M = (Matcher*)matcher;
+    std::vector<bbox_t> detections = M->yolo->detector->detect(M->imageFrames[0].image);
     for (size_t i = 0; i < detections.size(); i++) {
         bbox_t d = detections[i];
         if (d.obj_id == 0) {
@@ -160,6 +123,7 @@ void Runner_1::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
+    Matcher *M = (Matcher*)matcher;
     if (M->imageFrames[1].image.rows > 0) {
         M->imageFrames[1].getCrops();
         M->featureModel->infer(&M->imageFrames[1]);
@@ -191,21 +155,24 @@ void Runner_2::run()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
+    Matcher *M = (Matcher*)matcher;
     if (M->imageFrames[2].result.size() > 0) {
-        cv::Mat image(1024, 640, CV_8UC3);
-        size_t max_block = 80;
+        int rows = M->cropParam->spinRows->value();
+        int cols = M->cropParam->spinCols->value();
+        cv::Mat image(rows * crop_height, cols * crop_width, CV_8UC3, cv::Scalar(128, 128, 128));
+        size_t max_block = rows * cols;
         size_t loop_end = min(max_block, M->imageFrames[2].result.size());
         for (size_t i = 0; i < loop_end; i++) {
-            int id = M->imageFrames[2].result[i].first % 80;
-            size_t y = id / 10;
-            size_t x = id - y * 10;
+            int id = M->imageFrames[2].result[i].first % (rows * cols);
+            size_t y = id / cols;
+            size_t x = id - y * cols;
 
             fbox box(M->imageFrames[2].result[i].second);
             cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
-            crop.copyTo(image(cv::Rect(x*64, y*128, 64, 128)));
+            crop.copyTo(image(cv::Rect(x*crop_width, y*crop_height, crop_width, crop_height)));
         }
 
-        M->featureModel->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888)));
+        M->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888)));
 
         for (size_t i = 0; i < M->imageFrames[2].result.size(); i++) {
             DETECTBOX box = M->imageFrames[2].result[i].second;

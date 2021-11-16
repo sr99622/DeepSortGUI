@@ -34,6 +34,7 @@ class PanelDialog : public QDialog
 
 public:
     PanelDialog(QMainWindow *parent);
+    PanelDialog(QMainWindow *parent, const QString& settingsKey);
     void closeEvent(QCloseEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void moveEvent(QMoveEvent *event) override;
