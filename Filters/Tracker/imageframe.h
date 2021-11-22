@@ -16,6 +16,7 @@ class fbox {
 public:
     fbox(const bbox_t& bbox);
     fbox(const DETECTBOX& box);
+    fbox(float x, float y, float w, float h);
     bbox_t to_bbox() const;
 
     float x2();
@@ -33,6 +34,7 @@ public:
     void getCrops();
     cv::Mat getCrop(const cv::Mat& image, fbox* box, const cv::Size& size) const;
     void writeToDetections(DETECTIONS *detections);
+    void validateBox(fbox* box, const cv::Size& size);
 
     cv::Mat image;
 

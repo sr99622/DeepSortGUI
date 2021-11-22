@@ -11,6 +11,7 @@ public:
     KAL_DATA initiate(const DETECTBOX& measurement);
     void predict(KAL_MEAN& mean, KAL_COVA& covariance);
     KAL_HDATA project(const KAL_MEAN& mean, const KAL_COVA& covariance);
+
     KAL_DATA update(const KAL_MEAN& mean,
                     const KAL_COVA& covariance,
                     const DETECTBOX& measurement);

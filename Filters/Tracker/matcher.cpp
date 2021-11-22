@@ -10,6 +10,7 @@ Matcher::Matcher(QMainWindow *parent)
     featureModel = new FeatureModel(mainWindow);
     cropDialog = new CropDialog(mainWindow);
     cropParam = new CropParam(mainWindow, cropDialog);
+    trackerStatsDialog = new TrackerStatsDialog(mainWindow);
 
     txtNNBudget = new NumberTextBox(MW->settings, "Matcher/txtNNBudget", INTEGER_NUMBER, "nn budget");
     if (txtNNBudget->text().length() == 0) txtNNBudget->setIntValue(100);
@@ -21,13 +22,17 @@ Matcher::Matcher(QMainWindow *parent)
     if (txtNmsMaxOverlap->text().length() == 0) txtNmsMaxOverlap->setFloatValue(1.0f);
 
     elapsed_0 = new QLabel();
-    QLabel *lbl04 = new QLabel("time elpased:");
+    QLabel *lbl04 = new QLabel("time elapsed:");
     elapsed_1 = new QLabel();
-    QLabel *lbl05 = new QLabel("time elpased:");
+    QLabel *lbl05 = new QLabel("time elapsed:");
     elapsed_2 = new QLabel();
-    QLabel *lbl06 = new QLabel("time elpased:");
+    QLabel *lbl06 = new QLabel("time elapsed:");
     detection_count = new QLabel();
     QLabel *lbl07 = new QLabel("count:");
+
+    QPushButton *btnShowTrackerStats = new QPushButton("Stats");
+    btnShowTrackerStats->setMaximumWidth(btnShowTrackerStats->fontMetrics().boundingRect(btnShowTrackerStats->text()).width() * 1.5);
+    connect(btnShowTrackerStats, SIGNAL(clicked()), this, SLOT(showTrackerStats()));
 
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(yolo,                       0, 0, 1, 4);
@@ -44,9 +49,12 @@ Matcher::Matcher(QMainWindow *parent)
     layout->addWidget(txtMinConfidence,           4, 1, 1, 1);
     layout->addWidget(txtNmsMaxOverlap->lbl,      4, 2, 1, 1);
     layout->addWidget(txtNmsMaxOverlap,           4, 3, 1, 1);
+    layout->addWidget(btnShowTrackerStats,        5, 0, 1, 1);
     layout->addWidget(lbl05,                      5, 2, 1, 1, Qt::AlignRight);
     layout->addWidget(elapsed_1,                  5, 3, 1, 1);
     layout->addWidget(cropParam,                  6, 0, 1, 4);
+    layout->addWidget(lbl06,                      7, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(elapsed_2,                  7, 3, 1, 1);
     panel->setLayout(layout);
 
     runner_0 = new Runner_0(this);
@@ -54,6 +62,11 @@ Matcher::Matcher(QMainWindow *parent)
     runner_2 = new Runner_2(this);
 
     mytracker = new tracker(txtMaxCosineDistance->floatValue(), txtNNBudget->intValue());
+}
+
+void Matcher::showTrackerStats()
+{
+    trackerStatsDialog->show();
 }
 
 void Matcher::initializeModels()
@@ -137,11 +150,19 @@ void Runner_1::run()
         M->mytracker->predict();
         M->mytracker->update(detections);
 
+        M->cropParam->expiredTrackIds.clear();
+
         for (Track& track : M->mytracker->tracks) {
-            if (!track.is_confirmed() || track.time_since_update > 1)
+            if (!track.is_confirmed()/* || track.time_since_update > 1*/)
                 continue;
+
             M->imageFrames[1].result.push_back(std::make_pair(track.track_id, track.to_tlwh()));
+
+            if (track.time_since_update == track._max_age)
+                M->cropParam->expiredTrackIds.push_back(track.track_id);
         }
+
+        ((TrackerStatsPanel*)M->trackerStatsDialog->panel)->populate(M->mytracker);
     }
 
     finished = true;
@@ -159,17 +180,40 @@ void Runner_2::run()
     if (M->imageFrames[2].result.size() > 0) {
         int rows = M->cropParam->spinRows->value();
         int cols = M->cropParam->spinCols->value();
-        cv::Mat image(rows * crop_height, cols * crop_width, CV_8UC3, cv::Scalar(128, 128, 128));
-        size_t max_block = rows * cols;
-        size_t loop_end = min(max_block, M->imageFrames[2].result.size());
+        cv::Mat image(rows * crop_height, cols * crop_width, CV_8UC3, cv::Scalar(64, 64, 64));
+        size_t loop_end = min((size_t)rows * cols, M->imageFrames[2].result.size());
+
+        //std::cout << "results: " << M->imageFrames[2].result.size() << "detections: " << M->imageFrames[2].detections.size() << std::endl;
+
         for (size_t i = 0; i < loop_end; i++) {
-            int id = M->imageFrames[2].result[i].first % (rows * cols);
-            size_t y = id / cols;
-            size_t x = id - y * cols;
+            int track_id = M->imageFrames[2].result[i].first;
+            int assign_id = M->cropParam->findAssignment(track_id);
+            if (assign_id < 0) {
+                assign_id = M->cropParam->findAssignment(-1);
+                if (assign_id > -1) {
+                    M->cropParam->trackAssignments[assign_id] = track_id;
+                }
+            }
+
+            size_t y = assign_id / cols;
+            size_t x = assign_id - y * cols;
 
             fbox box(M->imageFrames[2].result[i].second);
-            cv::Mat crop = M->imageFrames[2].getCrop(M->imageFrames[2].image, &box, cv::Size(crop_width, crop_height));
-            crop.copyTo(image(cv::Rect(x*crop_width, y*crop_height, crop_width, crop_height)));
+            cv::Size target_size(crop_width, crop_height);
+            M->imageFrames[2].validateBox(&box, target_size);
+
+            if (box.w > 1 && box.h > 1) {
+                try {
+                    cv::Mat crop = M->imageFrames[2].image(cv::Range(box.y, box.y + box.h), cv::Range(box.x, box.x + box.w));
+                    cv::resize(crop, crop, target_size);
+                    crop.copyTo(image(cv::Rect(x * crop_width, y * crop_height, crop_width, crop_height)));
+                }
+                catch (const std::exception& e) {
+                    std::cout << "x: " << box.x << " y: " << box.y << " w: " << box.w << " h: " << box.h << std::endl;
+                    std::cout << "Runner 2 error: " << e.what() << std::endl;
+                }
+            }
+
         }
 
         M->cropDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888)));
@@ -181,11 +225,18 @@ void Runner_2::run()
             cv::putText(M->imageFrames[2].image, QString::number(M->imageFrames[2].result[i].first).toStdString(), cv::Point(rect.x, rect.y),
                         cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
         }
+
+        for (int track_id : M->cropParam->expiredTrackIds) {
+            int assign_id = M->cropParam->findAssignment(track_id);
+            if (assign_id > -1) {
+                M->cropParam->trackAssignments[assign_id] = -1;
+            }
+        }
     }
 
     finished = true;
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
-    //std::cout << "elasped 2 : " << elapsed << std::endl;
+    M->elapsed_2->setText(QString::number(elapsed));
 }

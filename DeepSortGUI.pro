@@ -53,7 +53,7 @@ SOURCES += \
     Filters/Tracker/featuremodel.cpp \
     Filters/Tracker/imageframe.cpp \
     Filters/Tracker/matcher.cpp \
-    Filters/Tracker/trackerstats.cpp \
+    Filters/Tracker/trackerstatspanel.cpp \
     Filters/filter.cpp \
     Filters/filterchain.cpp \
     Filters/filterlistmodel.cpp \
@@ -62,6 +62,7 @@ SOURCES += \
     Filters/subpicture.cpp \
     Models/yolo.cpp \
     Utilities/avexception.cpp \
+    Utilities/checkbox.cpp \
     Utilities/colorbutton.cpp \
     Utilities/cudaexception.cpp \
     Utilities/directorysetter.cpp \
@@ -76,6 +77,7 @@ SOURCES += \
     Utilities/paneldialog.cpp \
     Utilities/slider.cpp \
     Utilities/spinbox.cpp \
+    Utilities/texthistogram.cpp \
     Utilities/waitbox.cpp \
     Utilities/yuvcolor.cpp \
     configpanel.cpp \
@@ -136,7 +138,7 @@ HEADERS += \
     Filters/Tracker/featuremodel.h \
     Filters/Tracker/imageframe.h \
     Filters/Tracker/matcher.h \
-    Filters/Tracker/trackerstats.h \
+    Filters/Tracker/trackerstatspanel.h \
     Filters/filter.h \
     Filters/filterchain.h \
     Filters/filterlistmodel.h \
@@ -145,6 +147,7 @@ HEADERS += \
     Filters/subpicture.h \
     Models/yolo.h \
     Utilities/avexception.h \
+    Utilities/checkbox.h \
     Utilities/colorbutton.h \
     Utilities/cudaexception.h \
     Utilities/directorysetter.h \
@@ -159,6 +162,7 @@ HEADERS += \
     Utilities/paneldialog.h \
     Utilities/slider.h \
     Utilities/spinbox.h \
+    Utilities/texthistogram.h \
     Utilities/waitbox.h \
     Utilities/yuvcolor.h \
     configpanel.h \

@@ -224,7 +224,6 @@ void Frame::hwReadMat(const cv::Mat& mat)
 
         eh.ck(cudaMemcpy(pBGR, mat.data, sizeof(Npp8u) * ch * ff, cudaMemcpyHostToDevice));
 
-        // RGB vs BGR such a waste of time
         //eh.ck(nppiBGRToYUV420_8u_AC4P3R(pBGR, ch * frame->linesize[0], pYUV, frame->linesize, {width, height}), "convert backwards");
         eh.ck(nppiRGBToYUV420_8u_C3P3R(pBGR, ch * frame->linesize[0], pYUV, frame->linesize, {width, height}), "convert backwards");
 
@@ -239,16 +238,16 @@ void Frame::hwReadMat(const cv::Mat& mat)
 
 void Frame::readMat(const cv::Mat& mat)
 {
-    width = mat.cols;
-    height = mat.rows;
-    int cvLinesizes[1];
-    cvLinesizes[0] = mat.step1();
-    if (frame == NULL) {
-      frame = av_frame_alloc();
-      av_image_alloc(frame->data, frame->linesize, width, height, AV_PIX_FMT_YUV420P, 1);
+    if (width != mat.cols || height != mat.rows) {
+        allocateFrame(mat.cols, mat.rows, AV_PIX_FMT_YUV420P);
+        //av_image_alloc(frame->data, frame->linesize, width, height, AV_PIX_FMT_YUV420P, 1);
     }
+
     SwsContext *conversion = sws_getContext(width, height, AV_PIX_FMT_BGR24, width, height,
                                             (AVPixelFormat)frame->format, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+    int cvLinesizes[1];
+    cvLinesizes[0] = mat.step1();
     sws_scale(conversion, &mat.data, cvLinesizes, 0, height, frame->data, frame->linesize);
     sws_freeContext(conversion);
 }

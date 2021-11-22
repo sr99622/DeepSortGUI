@@ -8,6 +8,7 @@
 #include "imageframe.h"
 #include "featuremodel.h"
 #include "cropdialog.h"
+#include "trackerstatspanel.h"
 #include "DeepSort/matching/tracker.h"
 #include "Utilities/numbertextbox.h"
 
@@ -76,6 +77,9 @@ public:
     tracker *mytracker;
     CropDialog *cropDialog;
     CropParam *cropParam;
+    TrackerStatsDialog *trackerStatsDialog;
+
+    QSize resolution;
 
     ImageFrame imageFrames[3];
     Runner_0 *runner_0;
@@ -91,6 +95,9 @@ public:
     NumberTextBox *txtMaxCosineDistance;
     NumberTextBox *txtMinConfidence;
     NumberTextBox *txtNmsMaxOverlap;
+
+public slots:
+    void showTrackerStats();
 
 };
 

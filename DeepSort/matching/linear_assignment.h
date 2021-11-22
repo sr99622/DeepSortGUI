@@ -15,7 +15,7 @@ class linear_assignment
 
 public:
     static linear_assignment* getInstance();
-    TRACHER_MATCHD matching_cascade(tracker* distance_metric,
+    TRACKER_MATCHED matching_cascade(tracker* distance_metric,
             tracker::GATED_METRIC_FUNC distance_metric_func,
             float max_distance,
             int cascade_depth,
@@ -23,7 +23,7 @@ public:
             const DETECTIONS& detections,
             std::vector<int> &track_indices,
             std::vector<int> detection_indices = std::vector<int>());
-    TRACHER_MATCHD min_cost_matching(
+    TRACKER_MATCHED min_cost_matching(
             tracker* distance_metric,
             tracker::GATED_METRIC_FUNC distance_metric_func,
             float max_distance,

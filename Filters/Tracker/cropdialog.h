@@ -27,12 +27,17 @@ class CropParam : public QWidget
 
 public:
     CropParam(QMainWindow *parent, QObject *cropDialog);
+    int findAssignment(int track_id);
+    void initializeTrackAssignment();
 
     QMainWindow *mainWindow;
     QObject *cropDialog;
     QPushButton *btnShow;
     SpinBox *spinCols;
     SpinBox *spinRows;
+
+    std::vector<int> trackAssignments;
+    std::vector<int> expiredTrackIds;
 
 public slots:
     void showDialog();

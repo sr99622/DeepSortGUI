@@ -13,7 +13,7 @@ linear_assignment *linear_assignment::getInstance()
     return instance;
 }
 
-TRACHER_MATCHD
+TRACKER_MATCHED
 linear_assignment::matching_cascade(
         tracker *distance_metric,
         tracker::GATED_METRIC_FUNC distance_metric_func,
@@ -24,7 +24,7 @@ linear_assignment::matching_cascade(
         std::vector<int>& track_indices,
         std::vector<int> detection_indices)
 {
-    TRACHER_MATCHD res;
+    TRACKER_MATCHED res;
     //!!!python diff: track_indices will never be None.
     //    if(track_indices.empty() == true) {
     //        for(size_t i = 0; i < tracks.size(); i++) {
@@ -53,7 +53,7 @@ linear_assignment::matching_cascade(
         }
         if(track_indices_l.size() == 0) continue; //Nothing to match at this level.
 
-        TRACHER_MATCHD tmp = min_cost_matching(
+        TRACKER_MATCHED tmp = min_cost_matching(
                     distance_metric, distance_metric_func,
                     max_distance, tracks, detections, track_indices_l,
                     unmatched_detections);
@@ -73,7 +73,7 @@ linear_assignment::matching_cascade(
     return res;
 }
 
-TRACHER_MATCHD
+TRACKER_MATCHED
 linear_assignment::min_cost_matching(tracker *distance_metric,
         tracker::GATED_METRIC_FUNC distance_metric_func,
         float max_distance,
@@ -82,7 +82,7 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
         std::vector<int> &track_indices,
         std::vector<int> &detection_indices)
 {
-    TRACHER_MATCHD res;
+    TRACKER_MATCHED res;
     //!!!python diff: track_indices && detection_indices will never be None.
     //    if(track_indices.empty() == true) {
     //        for(size_t i = 0; i < tracks.size(); i++) {

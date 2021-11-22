@@ -8,12 +8,9 @@ CropDialog::CropDialog(QMainWindow *parent) : PanelDialog(parent)
     lblImage = new QLabel();
     lblImage->setMinimumWidth(640);
     lblImage->setMinimumHeight(480);
-    QGridLayout *panelLayout = new QGridLayout();
-    panelLayout->addWidget(lblImage,   0, 0, 1, 1);
-    panel = new Panel(mainWindow);
-    panel->setLayout(panelLayout);
     QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(panel);
+    layout->addWidget(lblImage);
+    layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 
     settingsKey = "CropDialog/geometry";
@@ -28,9 +25,11 @@ CropParam::CropParam(QMainWindow *parent, QObject *cropDialog)
     connect(btnShow, SIGNAL(clicked()), this, SLOT(showDialog()));
 
     spinCols = new SpinBox(MW->settings, "CropParam/spinCols", "Cols");
-    connect(spinCols, SIGNAL(valueChanged(int)), this, SLOT(adjustDailog(int)));
+    connect(spinCols, SIGNAL(valueChanged(int)), this, SLOT(adjustDialog(int)));
     spinRows = new SpinBox(MW->settings, "CropParam/spinRows", "Rows");
-    connect(spinRows, SIGNAL(valueChanged(int)), this, SLOT(adjustDailog(int)));
+    connect(spinRows, SIGNAL(valueChanged(int)), this, SLOT(adjustDialog(int)));
+
+    initializeTrackAssignment();
 
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(spinCols->lbl,    0, 0, 1, 1, Qt::AlignRight);
@@ -46,20 +45,40 @@ CropParam::CropParam(QMainWindow *parent, QObject *cropDialog)
     setLayout(mainLayout);
 }
 
+void CropParam::initializeTrackAssignment()
+{
+    size_t num_crops = spinRows->value() * spinCols->value();
+    if (num_crops > trackAssignments.size()) {
+        for (size_t i = trackAssignments.size(); i < num_crops; i++)
+            trackAssignments.push_back(-1);
+    }
+    else {
+        while (trackAssignments.size() > num_crops)
+            trackAssignments.erase(trackAssignments.end() - 1);
+    }
+}
+
+int CropParam::findAssignment(int track_id)
+{
+    int result = -1;
+    auto position = std::find(trackAssignments.begin(), trackAssignments.end(), track_id);
+    if (position != trackAssignments.end())
+        result = position - trackAssignments.begin();
+    return result;
+}
+
 void CropParam::adjustDialog(int arg)
 {
     Q_UNUSED(arg);
     CropDialog *cp = (CropDialog*)cropDialog;
-    cp->lblImage->setMinimumWidth(spinCols->value() * crop_width);
-    cp->lblImage->setMaximumWidth(spinCols->value() * crop_width);
-    cp->lblImage->setMinimumHeight(spinRows->value() * crop_height);
-    cp->lblImage->setMaximumHeight(spinRows->value() * crop_height);
-    /*
-    if (cp->isVisible()) {
-        cp->hide();
-        cp->show();
-    }
-    */
+    int width = spinCols->value() * crop_width;
+    int height = spinRows->value() * crop_height;
+    cp->lblImage->setFixedWidth(width);
+    cp->lblImage->setFixedHeight(height);
+    QMargins margins = cp->contentsMargins();
+    cp->setFixedWidth(width + margins.right() + margins.left());
+    cp->setFixedHeight(height + margins.top() + margins.bottom());
+    initializeTrackAssignment();
 }
 
 void CropParam::showDialog()

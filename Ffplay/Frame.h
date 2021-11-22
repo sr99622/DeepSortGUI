@@ -53,8 +53,8 @@ public:
 	double pts;
 	double duration;
 	int64_t pos;
-	int width;
-	int height;
+    int width = 0;
+    int height = 0;
 	int format;
 	AVRational sar;
 	int uploaded;
