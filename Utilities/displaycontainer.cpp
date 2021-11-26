@@ -76,13 +76,9 @@ DisplayLabel::DisplayLabel() : QLabel()
     mouseTracking = false;
 }
 
-QSize DisplayLabel::getSize()
-{
-    return size();
-}
-
 void DisplayLabel::leaveEvent(QEvent *event)
 {
+    Q_UNUSED(event);
     if (mouseTracking) {
         emit mouseLeft();
     }

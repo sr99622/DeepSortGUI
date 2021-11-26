@@ -12,14 +12,35 @@ CropDialog::CropDialog(QMainWindow *parent) : PanelDialog(parent)
     layout->addWidget(lblImage);
     layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
+    setContentsMargins(0, 0, 0, 0);
+
+    param = new CropParam(this);
 
     settingsKey = "CropDialog/geometry";
 }
 
-CropParam::CropParam(QMainWindow *parent, QObject *cropDialog)
+void CropDialog::mouseReleaseEvent(QMouseEvent *event)
 {
-    mainWindow = parent;
+    QPoint point = event->pos();
+
+    int cols = ((CropParam*)param)->spinCols->value();
+    int rows = ((CropParam*)param)->spinRows->value();
+
+    int width = cols * crop_width;
+    int height = rows * crop_height;
+
+    int x = point.x() * cols / width;
+    int y = point.y() * rows / height;
+    int assign_id = y * cols + x;
+
+    focus_track_id = ((CropParam*)param)->trackAssignments[assign_id];
+}
+
+CropParam::CropParam(QObject *cropDialog)
+{
+    mainWindow = ((CropDialog*)cropDialog)->mainWindow;
     this->cropDialog = cropDialog;
+    ((CropDialog*)cropDialog)->param = this;
     btnShow = new QPushButton("Show");
     btnShow->setMaximumWidth(btnShow->fontMetrics().boundingRect(btnShow->text()).width() * 1.5);
     connect(btnShow, SIGNAL(clicked()), this, SLOT(showDialog()));
@@ -75,9 +96,8 @@ void CropParam::adjustDialog(int arg)
     int height = spinRows->value() * crop_height;
     cp->lblImage->setFixedWidth(width);
     cp->lblImage->setFixedHeight(height);
-    QMargins margins = cp->contentsMargins();
-    cp->setFixedWidth(width + margins.right() + margins.left());
-    cp->setFixedHeight(height + margins.top() + margins.bottom());
+    cp->setFixedWidth(width);
+    cp->setFixedHeight(height);
     initializeTrackAssignment();
 }
 

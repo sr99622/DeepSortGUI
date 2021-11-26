@@ -45,8 +45,8 @@ public:
     void saveSettings(QSettings *settings);
     void restoreSettings(QSettings *settings);
     bool isFilterActive(Filter *filter);
-    bool isFilterActive(QString filter_name);
-    Filter *getFilterByName(QString filter_name);
+    bool isFilterActive(const QString& filter_name);
+    Filter *getFilterByName(const QString& filter_name);
     Filter *getCurrentFilter();
     void toggleEngage();
 

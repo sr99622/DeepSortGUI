@@ -340,7 +340,7 @@ bool FilterPanel::isFilterActive(Filter *filter) {
     return result;
 }
 
-bool FilterPanel::isFilterActive(QString filter_name)
+bool FilterPanel::isFilterActive(const QString& filter_name)
 {
     bool result = false;
     for (int i = 0; i < leftModel->filters.size(); i++) {
@@ -352,7 +352,7 @@ bool FilterPanel::isFilterActive(QString filter_name)
     return result;
 }
 
-Filter *FilterPanel::getFilterByName(QString filter_name)
+Filter *FilterPanel::getFilterByName(const QString& filter_name)
 {
     Filter *result = NULL;
     for (int i = 0; i < filters.size(); i++) {

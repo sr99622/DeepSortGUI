@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <QRect>
 #include "yolo_v2_class.hpp"
 #include "DeepSort/feature/model.h"
 
@@ -16,6 +17,7 @@ class fbox {
 public:
     fbox(const bbox_t& bbox);
     fbox(const DETECTBOX& box);
+    fbox(const QRect& rect);
     fbox(float x, float y, float w, float h);
     bbox_t to_bbox() const;
 
@@ -32,7 +34,8 @@ public:
     ~ImageFrame();
     void clear();
     void getCrops();
-    cv::Mat getCrop(const cv::Mat& image, fbox* box, const cv::Size& size) const;
+    cv::Mat getCrop(fbox* box, const cv::Size& size) const;
+    cv::Mat getFocusCrop(fbox* box) const;
     void writeToDetections(DETECTIONS *detections);
     void validateBox(fbox* box, const cv::Size& size);
 

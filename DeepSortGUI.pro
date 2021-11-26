@@ -51,6 +51,7 @@ SOURCES += \
     Filters/Tester/tester.cpp \
     Filters/Tracker/cropdialog.cpp \
     Filters/Tracker/featuremodel.cpp \
+    Filters/Tracker/focusdialog.cpp \
     Filters/Tracker/imageframe.cpp \
     Filters/Tracker/matcher.cpp \
     Filters/Tracker/trackerstatspanel.cpp \
@@ -136,6 +137,7 @@ HEADERS += \
     Filters/Tester/tester.h \
     Filters/Tracker/cropdialog.h \
     Filters/Tracker/featuremodel.h \
+    Filters/Tracker/focusdialog.h \
     Filters/Tracker/imageframe.h \
     Filters/Tracker/matcher.h \
     Filters/Tracker/trackerstatspanel.h \

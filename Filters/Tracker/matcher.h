@@ -8,6 +8,7 @@
 #include "imageframe.h"
 #include "featuremodel.h"
 #include "cropdialog.h"
+#include "focusdialog.h"
 #include "trackerstatspanel.h"
 #include "DeepSort/matching/tracker.h"
 #include "Utilities/numbertextbox.h"
@@ -69,6 +70,9 @@ public:
     void filter(Frame *vp) override;
     bool threadsFinished();
     void initializeModels();
+    void checkDisplayClicked();
+    void fillCropDialog();
+    void fillFocusDialog();
 
     QMainWindow *mainWindow;
 
@@ -76,7 +80,7 @@ public:
     FeatureModel *featureModel;
     tracker *mytracker;
     CropDialog *cropDialog;
-    CropParam *cropParam;
+    FocusDialog *focusDialog;
     TrackerStatsDialog *trackerStatsDialog;
 
     QSize resolution;
@@ -96,8 +100,15 @@ public:
     NumberTextBox *txtMinConfidence;
     NumberTextBox *txtNmsMaxOverlap;
 
+    QPoint displayClickedPos;
+
+signals:
+    void subPictureApply();
+    void subPictureReset();
+
 public slots:
     void showTrackerStats();
+    void handleDisplayClicked(const QPoint&);
 
 };
 

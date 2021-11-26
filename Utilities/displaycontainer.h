@@ -40,7 +40,6 @@ class DisplayLabel : public QLabel
 
 public:
     DisplayLabel();
-    QSize getSize();
     bool mouseTracking;
 
 protected:
@@ -50,8 +49,8 @@ protected:
     void leaveEvent(QEvent *event) override;
 
 signals:
-    void clicked(QPoint);
-    void rightClicked(QPoint);
+    void clicked(const QPoint&);
+    void rightClicked(const QPoint&);
     void mouseMoved(QMouseEvent*);
     void mouseLeft();
 

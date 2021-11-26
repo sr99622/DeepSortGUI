@@ -10,23 +10,12 @@
 #include "Utilities/paneldialog.h"
 #include "Utilities/spinbox.h"
 
-class CropDialog : public PanelDialog
-{
-    Q_OBJECT
-
-public:
-    CropDialog(QMainWindow *parent);
-
-    QLabel *lblImage;
-
-};
-
 class CropParam : public QWidget
 {
     Q_OBJECT
 
 public:
-    CropParam(QMainWindow *parent, QObject *cropDialog);
+    CropParam(QObject *cropDialog);
     int findAssignment(int track_id);
     void initializeTrackAssignment();
 
@@ -45,5 +34,20 @@ public slots:
 
 };
 
+class CropDialog : public PanelDialog
+{
+    Q_OBJECT
+
+public:
+    CropDialog(QMainWindow *parent);
+
+    QLabel *lblImage;
+    CropParam *param;
+    int focus_track_id = -1;
+
+protected:
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+};
 
 #endif // CROPDIALOG_H

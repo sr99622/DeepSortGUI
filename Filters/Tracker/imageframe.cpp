@@ -21,10 +21,29 @@ void ImageFrame::writeToDetections(DETECTIONS* arg)
     }
 }
 
+cv::Mat ImageFrame::getFocusCrop(fbox* box) const
+{
+    box->x = std::min((float)(image.cols - 1), std::max(box->x, 0.0f));
+    box->y = std::min((float)(image.rows - 1), std::max(box->y, 0.0f));
+    box->w = std::max(0.0f, std::min(box->w, image.cols - 1 - box->x));
+    box->h = std::max(0.0f, std::min(box->h, image.rows - 1 - box->y));
+
+    cv::Mat crop;
+    try {
+        crop = image(cv::Range(box->y, box->y + box->h), cv::Range(box->x, box->x + box->w));
+    }
+    catch (const std::exception& e) {
+        std::cout << "ImageFrame::getCrop exception: " << e.what() << std::endl;
+        std::cout << "x1: " << box->x << " y1: " << box->y << " x2: " << box->x + box->w << " y2: " << box->y + box->h << std::endl;
+        crop = cv::Mat(box->h, box->w, CV_8UC3, cv::Scalar(64, 64, 64));
+    }
+    return crop;
+}
+
 void ImageFrame::getCrops()
 {
     for (size_t i = 0; i < detections.size(); i++)
-        crops.push_back(getCrop(image, &detections[i], cv::Size(crop_width, crop_height)));
+        crops.push_back(getCrop(&detections[i], cv::Size(crop_width, crop_height)));
 }
 
 void ImageFrame::validateBox(fbox* box, const cv::Size& size)
@@ -40,7 +59,7 @@ void ImageFrame::validateBox(fbox* box, const cv::Size& size)
     box->h = std::max(0.0f, std::min(box->h, image.rows - 1 - box->y));
 }
 
-cv::Mat ImageFrame::getCrop(const cv::Mat& image, fbox* box, const cv::Size& size) const
+cv::Mat ImageFrame::getCrop(fbox* box, const cv::Size& size) const
 {
     fbox original_box(box->x, box->y, box->w, box->h);
     float target_aspect = size.width / (float)size.height;
@@ -98,6 +117,14 @@ fbox::fbox(const DETECTBOX& box)
     y = (float)box[1];
     w = (float)box[2];
     h = (float)box[3];
+}
+
+fbox::fbox(const QRect& rect)
+{
+    x = (float)rect.x();
+    y = (float)rect.y();
+    w = (float)rect.width();
+    h = (float)rect.height();
 }
 
 fbox::fbox(float x, float y, float w, float h)
