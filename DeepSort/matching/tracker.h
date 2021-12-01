@@ -5,9 +5,8 @@
 
 #include "kalmanfilter.h"
 #include "track.h"
+#include "nn_matching.h"
 #include "../feature/model.h"
-
-class NearNeighborDisMetric;
 
 class tracker
 {
@@ -40,7 +39,7 @@ private:
     void _initiate_track(const DETECTION_ROW& detection);
 
 public:
-    DYNAMICM gated_matric(
+    DYNAMICM gated_metric(
             std::vector<Track>& tracks,
             const DETECTIONS& dets,
             const std::vector<int>& track_indices,

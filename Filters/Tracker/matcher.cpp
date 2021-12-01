@@ -63,7 +63,7 @@ Matcher::Matcher(QMainWindow *parent)
     runner_2 = new Runner_2(this);
 
     mytracker = new tracker(txtMaxCosineDistance->floatValue(), txtNNBudget->intValue());
-    connect(MW->dc()->display, SIGNAL(clicked(const QPoint&)), this, SLOT(handleDisplayClicked(const QPoint&)));
+    connect(MW->display(), SIGNAL(clicked(const QPoint&)), this, SLOT(handleDisplayClicked(const QPoint&)));
 
 }
 
@@ -128,8 +128,8 @@ void Matcher::checkDisplayClicked()
         float h1 = imageFrames[2].image.rows;
         float w1 = imageFrames[2].image.cols;
 
-        float h = MW->dc()->display->height();
-        float w = MW->dc()->display->width();
+        float h = MW->display()->height();
+        float w = MW->display()->width();
         int x = displayClickedPos.x();
         int y = displayClickedPos.y();
 
@@ -193,6 +193,18 @@ void Matcher::fillFocusDialog()
             rect.moveCenter(QPoint(box.x + box.w/2, box.y + box.h/2));
             fbox focus_box(rect);
             cv::Mat image = imageFrames[2].getFocusCrop(&focus_box);
+
+            QSize sizeRect = rect.size();
+            sizeRect.scale(focusDialog->width(), focusDialog->height(), Qt::KeepAspectRatio);
+            if (sizeRect.isValid()) {
+                try {
+                    cv::resize(image, image, cv::Size(sizeRect.width(), sizeRect.height()));
+                }
+                catch (const exception& e) {
+                    std::cout << "Matcher::fillFocusDialog error: " << e.what() << std::endl;
+                }
+            }
+
             focusDialog->lblImage->setPixmap(QPixmap::fromImage(QImage(image.data, image.cols, image.rows, image.step, QImage::Format_BGR888)));
         }
     }

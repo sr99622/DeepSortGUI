@@ -148,7 +148,6 @@ void FilterPanel::styleButtons()
         moveLeftButton->setMinimumWidth(42);
         moveLeftButton->setMaximumHeight(17);
     }
-
 }
 
 Filter *FilterPanel::getCurrentFilter()
@@ -380,23 +379,4 @@ FilterDialog::FilterDialog(QMainWindow *parent) : PanelDialog(parent)
 FilterPanel *FilterDialog::getPanel()
 {
     return (FilterPanel*)panel;
-}
-
-void FilterDialog::keyPressEvent(QKeyEvent *event)
-{
-    Filter *filter = getPanel()->getCurrentFilter();
-    if (filter) {
-        getPanel()->getCurrentFilter()->keyPressEvent(event);
-    }
-
-    PanelDialog::keyPressEvent(event);
-}
-
-void FilterDialog::keyReleaseEvent(QKeyEvent *event)
-{
-    Filter *filter = getPanel()->getCurrentFilter();
-    if (filter) {
-        filter->keyReleaseEvent(event);
-    }
-   PanelDialog::keyReleaseEvent(event);
 }

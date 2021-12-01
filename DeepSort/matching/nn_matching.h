@@ -12,7 +12,7 @@ public:
     NearNeighborDisMetric(METRIC_TYPE metric, float matching_threshold, int budget);
     DYNAMICM distance(const FEATURES& features, const std::vector<int> &targets);
     void partial_fit(std::vector<TRACKER_DATA>& tid_feats, std::vector<int>& active_targets);
-    float mating_threshold;
+    float matching_threshold;
 
 private:
     typedef Eigen::VectorXf (NearNeighborDisMetric::*PTRFUN)(const FEATURES&, const FEATURES&);

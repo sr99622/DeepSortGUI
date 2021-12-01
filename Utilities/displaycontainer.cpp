@@ -28,7 +28,7 @@
 DisplayContainer::DisplayContainer(QMainWindow *parent)
 {
     mainWindow = parent;
-    display = new DisplayLabel();
+    display = new DisplayLabel(mainWindow);
     //display->setMinimumWidth(displayInitialWidth);
     //display->setMinimumHeight(displayInitialHeight);
     //display->setUpdatesEnabled(false);  // This setting prevents flicker in the display, deferred to render
@@ -71,9 +71,28 @@ DisplayContainer::DisplayContainer(QMainWindow *parent)
 
 }
 
-DisplayLabel::DisplayLabel() : QLabel()
+DisplayLabel::DisplayLabel(QMainWindow *parent) : QLabel()
 {
     mouseTracking = false;
+    mainWindow = parent;
+}
+
+void DisplayLabel::connectSubPicture()
+{
+    if (subPicture == nullptr) {
+        subPicture = (SubPicture*)MW->filter()->getFilterByName("Sub Picture");
+        connect(this, SIGNAL(mouseDrag(const QPointF&)), subPicture, SLOT(mouseMove(const QPointF&)));
+        connect(this, SIGNAL(wheelZoom(QWheelEvent*)), subPicture, SLOT(wheelZoom(QWheelEvent*)));
+    }
+}
+
+void DisplayLabel::wheelEvent(QWheelEvent *event)
+{
+    connectSubPicture();
+
+    if (MW->filter()->isFilterActive(subPicture)) {
+        emit wheelZoom(event);
+    }
 }
 
 void DisplayLabel::leaveEvent(QEvent *event)
@@ -86,6 +105,12 @@ void DisplayLabel::leaveEvent(QEvent *event)
 
 void DisplayLabel::mouseMoveEvent(QMouseEvent *event)
 {
+    connectSubPicture();
+
+    if (MW->filter()->isFilterActive(subPicture) && event->buttons() == Qt::LeftButton) {
+        emit mouseDrag(event->position() - clickPoint);
+    }
+
     if (mouseTracking) {
         //cout << "mouseMoved: " << event->pos().x() << ", " << event->pos().y() << endl;
         emit mouseMoved(event);
@@ -95,6 +120,9 @@ void DisplayLabel::mouseMoveEvent(QMouseEvent *event)
 
 void DisplayLabel::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->buttons() == Qt::LeftButton)
+        clickPoint = QPointF(0, 0);
+
     if (!mouseTracking) {
         QLabel::mouseReleaseEvent(event);
         if (event->button() == Qt::RightButton)
@@ -109,6 +137,9 @@ void DisplayLabel::mouseReleaseEvent(QMouseEvent *event)
 
 void DisplayLabel::mousePressEvent(QMouseEvent *event)
 {
+    if (event->buttons() == Qt::LeftButton)
+        clickPoint = event->position();
+
     if (mouseTracking) {
         emit mouseMoved(event);
     }

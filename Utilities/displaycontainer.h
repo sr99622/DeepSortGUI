@@ -23,6 +23,7 @@
 #define DISPLAYCONTAINER_H
 
 #include "displayslider.h"
+#include "Filters/subpicture.h"
 
 #include <QObject>
 #include <QWidget>
@@ -39,20 +40,28 @@ class DisplayLabel : public QLabel
     Q_OBJECT
 
 public:
-    DisplayLabel();
+    DisplayLabel(QMainWindow *parent);
+    void connectSubPicture();
+
+    QMainWindow *mainWindow;
     bool mouseTracking;
+    SubPicture *subPicture = nullptr;
+    QPointF clickPoint;
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void leaveEvent(QEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 signals:
     void clicked(const QPoint&);
     void rightClicked(const QPoint&);
     void mouseMoved(QMouseEvent*);
     void mouseLeft();
+    void wheelZoom(QWheelEvent*);
+    void mouseDrag(const QPointF&);
 
 };
 

@@ -17,7 +17,7 @@ NearNeighborDisMetric::NearNeighborDisMetric(NearNeighborDisMetric::METRIC_TYPE 
                     "NearestNeighborDistanceMetric::NearestNeighborDistanceMetric",
                     "Invalid metric; must be either 'euclidean' or 'cosine'", true);
     }
-    this->mating_threshold = matching_threshold;
+    this->matching_threshold = matching_threshold;
     this->budget = budget;
     this->samples.clear();
 }
@@ -26,7 +26,7 @@ DYNAMICM NearNeighborDisMetric::distance(const FEATURES &features, const std::ve
 {
     DYNAMICM cost_matrix = Eigen::MatrixXf::Zero(targets.size(), features.rows());
     int idx = 0;
-    for (int target:targets) {
+    for (int target : targets) {
         cost_matrix.row(idx) = (this->*_metric)(this->samples[target], features);
         idx++;
     }
@@ -35,7 +35,7 @@ DYNAMICM NearNeighborDisMetric::distance(const FEATURES &features, const std::ve
 
 void NearNeighborDisMetric::partial_fit(std::vector<TRACKER_DATA> &tid_feats, std::vector<int> &active_targets)
 {
-    for (TRACKER_DATA& data:tid_feats) {
+    for (TRACKER_DATA& data : tid_feats) {
         int track_id = data.first;
         FEATURES newFeatOne = data.second;
 

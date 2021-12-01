@@ -13,9 +13,9 @@ class FocusParam : public QWidget
     Q_OBJECT
 
 public:
-    FocusParam(QObject *focusDialog);
+    FocusParam(PanelDialog *focusDialog);
 
-    QObject *focusDialog;
+    PanelDialog *focusDialog;
     QMainWindow *mainWindow;
     NumberTextBox *txtCropWidth;
     NumberTextBox *txtCropHeight;
@@ -23,6 +23,7 @@ public:
 
 public slots:
     void showDialog();
+    void widthUp();
 
 };
 
@@ -35,6 +36,9 @@ public:
 
     QLabel *lblImage;
     FocusParam *param;
+
+protected:
+    void wheelEvent(QWheelEvent *event) override;
 
 };
 

@@ -19,14 +19,14 @@ Track::Track(KAL_MEAN& mean, KAL_COVA& covariance, int track_id, int n_init, int
 
 void Track::predict(KalmanFilter *kf)
 {
-    /*Propagate the state distribution to the current time step using a
+    /*  Propagate the state distribution to the current time step using a
         Kalman filter prediction step.
 
         Parameters
         ----------
         kf : kalman_filter.KalmanFilter
             The Kalman filter.
-        */
+    */
 
     kf->predict(this->mean, this->covariance);
     this->age += 1;

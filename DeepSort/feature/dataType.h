@@ -6,10 +6,10 @@
 #include <vector>
 #include <Eigen/Core>
 
-typedef Eigen::Matrix<float, 1, 4, Eigen::RowMajor> DETECTBOX;
-typedef Eigen::Matrix<float, -1, 4, Eigen::RowMajor> DETECTBOXES;
-typedef Eigen::Matrix<float, 1, 128, Eigen::RowMajor> FEATURE;
-typedef Eigen::Matrix<float, Eigen::Dynamic, 128, Eigen::RowMajor> FEATURES;
+typedef Eigen::Matrix<float,  1,   4, Eigen::RowMajor> DETECTBOX;
+typedef Eigen::Matrix<float, -1,   4, Eigen::RowMajor> DETECTBOXES;
+typedef Eigen::Matrix<float,  1, 128, Eigen::RowMajor> FEATURE;
+typedef Eigen::Matrix<float, -1, 128, Eigen::RowMajor> FEATURES;
 
 //Kalmanfilter
 typedef Eigen::Matrix<float, 1, 8, Eigen::RowMajor> KAL_MEAN;

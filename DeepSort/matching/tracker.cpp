@@ -1,3 +1,4 @@
+#include <iostream>
 #include "tracker.h"
 #include "nn_matching.h"
 #include "../feature/model.h"
@@ -17,7 +18,7 @@ tracker::tracker(float max_cosine_distance, int nn_budget, float max_iou_distanc
 
 void tracker::predict()
 {    
-    for (Track& track:tracks) {
+    for (Track& track : tracks) {
         track.predict(kf);
     }
 }
@@ -29,20 +30,19 @@ void tracker::update(const DETECTIONS &detections)
 
     std::vector<MATCH_DATA>& matches = res.matches;
 
-    for (MATCH_DATA& data:matches) {
+    for (MATCH_DATA& data : matches) {
         int track_idx = data.first;
         int detection_idx = data.second;
         tracks[track_idx].update(this->kf, detections[detection_idx]);
     }
 
     std::vector<int>& unmatched_tracks = res.unmatched_tracks;
-
-    for (int& track_idx:unmatched_tracks) {
+    for (int& track_idx : unmatched_tracks) {
         this->tracks[track_idx].mark_missed();
     }
-    std::vector<int>& unmatched_detections = res.unmatched_detections;
 
-    for (int& detection_idx:unmatched_detections) {
+    std::vector<int>& unmatched_detections = res.unmatched_detections;
+    for (int& detection_idx : unmatched_detections) {
         this->_initiate_track(detections[detection_idx]);
     }
 
@@ -57,8 +57,8 @@ void tracker::update(const DETECTIONS &detections)
 
     std::vector<int> active_targets;
     std::vector<TRACKER_DATA> tid_features;
-    for (Track& track:tracks) {
-        if(track.is_confirmed() == false)
+    for (Track& track : tracks) {
+        if (track.is_confirmed() == false)
             continue;
 
         active_targets.push_back(track.track_id);
@@ -87,25 +87,33 @@ void tracker::_match(const DETECTIONS &detections, TRACKER_MATCHED &res)
     }
 
     TRACKER_MATCHED matcha = linear_assignment::getInstance()->matching_cascade(
-                this, &tracker::gated_matric,
-                this->metric->mating_threshold,
+                this, &tracker::gated_metric,
+                this->metric->matching_threshold,
                 this->max_age,
                 this->tracks,
                 detections,
                 confirmed_tracks);
 
-    std::vector<int> iou_track_candidates;
-    iou_track_candidates.assign(unconfirmed_tracks.begin(), unconfirmed_tracks.end());
-    std::vector<int>::iterator it;
-    for (it = matcha.unmatched_tracks.begin(); it != matcha.unmatched_tracks.end();) {
+    std::vector<int> iou_track_candidates = unconfirmed_tracks;
+    for (auto it = matcha.unmatched_tracks.begin(); it != matcha.unmatched_tracks.end();) {
         int idx = *it;
         if (tracks[idx].time_since_update == 1) { //push into unconfirmed
             iou_track_candidates.push_back(idx);
-            it = matcha.unmatched_tracks.erase(it);
+            matcha.unmatched_tracks.erase(it);
             continue;
         }
         ++it;
     }
+
+    /*
+    size_t num_matches_a = matcha.matches.size();
+    size_t num_unmatched_tracks_a = matcha.unmatched_tracks.size();
+    size_t num_unmatched_detections_a = matcha.unmatched_detections.size();
+    std::cout << " MATCH A"
+              << " num_matches: " << num_matches_a
+              << " num_unmatched_tracks: " << num_unmatched_tracks_a
+              << " num_unmatched_detections: " << num_unmatched_detections_a << std::endl;
+    */
 
     TRACKER_MATCHED matchb = linear_assignment::getInstance()->min_cost_matching(
                 this, &tracker::iou_cost,
@@ -115,13 +123,23 @@ void tracker::_match(const DETECTIONS &detections, TRACKER_MATCHED &res)
                 iou_track_candidates,
                 matcha.unmatched_detections);
 
+    /*
+    size_t num_matches_b = matchb.matches.size();
+    size_t num_unmatched_tracks_b = matchb.unmatched_tracks.size();
+    size_t num_unmatched_detections_b = matchb.unmatched_detections.size();
+    std::cout << " MATCH B"
+              << " num_matches: " << num_matches_b
+              << " num_unmatched_tracks: " << num_unmatched_tracks_b
+              << " num_unmatched_detections: " << num_unmatched_detections_b << std::endl;
+    */
+
     //get result:
-    res.matches.assign(matcha.matches.begin(), matcha.matches.end());
+    res.matches = matcha.matches;
     res.matches.insert(res.matches.end(), matchb.matches.begin(), matchb.matches.end());
     //unmatched_tracks;
-    res.unmatched_tracks.assign(matcha.unmatched_tracks.begin(), matcha.unmatched_tracks.end());
+    res.unmatched_tracks = matcha.unmatched_tracks;
     res.unmatched_tracks.insert(res.unmatched_tracks.end(), matchb.unmatched_tracks.begin(), matchb.unmatched_tracks.end());
-    res.unmatched_detections.assign(matchb.unmatched_detections.begin(), matchb.unmatched_detections.end());
+    res.unmatched_detections = matchb.unmatched_detections;
 }
 
 void tracker::_initiate_track(const DETECTION_ROW &detection)
@@ -134,16 +152,19 @@ void tracker::_initiate_track(const DETECTION_ROW &detection)
     _next_idx += 1;
 }
 
-DYNAMICM tracker::gated_matric(std::vector<Track> &tracks, const DETECTIONS &dets, const std::vector<int>& track_indices, const std::vector<int>& detection_indices)
+DYNAMICM tracker::gated_metric(std::vector<Track> &tracks,
+                               const DETECTIONS &dets,
+                               const std::vector<int>& track_indices,
+                               const std::vector<int>& detection_indices)
 {
     FEATURES features(detection_indices.size(), 128);
     int pos = 0;
-    for (int i:detection_indices) {
+    for (int i : detection_indices) {
         features.row(pos++) = dets[i].feature;
     }
 
     std::vector<int> targets;
-    for (int i:track_indices) {
+    for (int i : track_indices) {
         targets.push_back(tracks[i].track_id);
     }
 
@@ -153,7 +174,10 @@ DYNAMICM tracker::gated_matric(std::vector<Track> &tracks, const DETECTIONS &det
     return res;
 }
 
-DYNAMICM tracker::iou_cost(std::vector<Track> &tracks, const DETECTIONS &dets, const std::vector<int>& track_indices, const std::vector<int>& detection_indices)
+DYNAMICM tracker::iou_cost(std::vector<Track> &tracks,
+                           const DETECTIONS &dets,
+                           const std::vector<int>& track_indices,
+                           const std::vector<int>& detection_indices)
 {
     int rows = track_indices.size();
     int cols = detection_indices.size();
@@ -203,8 +227,8 @@ Eigen::VectorXf tracker::iou(DETECTBOX& bbox, DETECTBOXES& candidates)
         float br_1 = std::min(bbox_br_1, candidates_br(i, 0));
         float br_2 = std::min(bbox_br_2, candidates_br(i, 1));
 
-        float w = br_1 - tl_1; w = (w < 0? 0: w);
-        float h = br_2 - tl_2; h = (h < 0? 0: h);
+        float w = br_1 - tl_1; w = (w < 0 ? 0 : w);
+        float h = br_2 - tl_2; h = (h < 0 ? 0 : h);
         float area_intersection = w * h;
         float area_candidates = candidates(i, 2) * candidates(i, 3);
         res[i] = area_intersection/(area_bbox + area_candidates - area_intersection);

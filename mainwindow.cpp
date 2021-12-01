@@ -422,14 +422,7 @@ ParameterPanel *MainWindow::parameter()
     return (ParameterPanel*)parameterDialog->panel;
 }
 
-/*
-CountPanel *MainWindow::count()
-{
-    return (CountPanel*)countDialog->panel;
-}
-*/
-
-QLabel *MainWindow::display()
+DisplayLabel *MainWindow::display()
 {
     return mainPanel->displayContainer->display;
 }

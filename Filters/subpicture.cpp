@@ -205,7 +205,60 @@ void SubPicture::filter(Frame *vp)
         if (MW->is->paused)
             MW->is->step_to_next_frame();
     }
+}
 
+void SubPicture::mouseMove(const QPointF& point)
+{
+    float display_width = MW->display()->width();
+    float display_height = MW->display()->height();
+    float display_aspect_ratio = display_width / display_height;
+    float image_aspect_ratio = w/(float)h;
+    float ratio = 0;
+
+    if (image_aspect_ratio > display_aspect_ratio)
+        ratio = w / display_width;
+    else
+        ratio = h / display_height;
+
+    int ptz_x = x;
+    int ptz_y = y;
+    int ptz_w = w;
+    int ptz_h = h;
+
+    ptz_x -= point.x() * ratio;
+    ptz_y -= point.y() * ratio;
+    update(ptz_x, ptz_y, ptz_w, ptz_h);
+
+    MW->display()->clickPoint += QPointF(point.x() * ratio * 2, point.y() * ratio * 2);
+}
+
+void SubPicture::wheelZoom(QWheelEvent *event) {
+    int ptz_x = x;
+    int ptz_y = y;
+    int ptz_w = w;
+    int ptz_h = h;
+
+    if (event->angleDelta().y() > 0) {
+        denominator++;
+        scale = ZOOM_FACTOR / (float) denominator;
+    }
+    else {
+        denominator--;
+        if (denominator < ZOOM_FACTOR)
+            denominator = ZOOM_FACTOR;
+        scale = ZOOM_FACTOR / (float) denominator;
+    }
+
+    int old_w = ptz_w;
+    int old_h = ptz_h;
+
+    ptz_w = codec_width * scale;
+    ptz_h = codec_height * scale;
+
+    ptz_x = (2*ptz_x + old_w - ptz_w) / 2;
+    ptz_y = (2*ptz_y + old_h - ptz_h) / 2;
+
+    update(ptz_x, ptz_y, ptz_w, ptz_h);
 }
 
 void SubPicture::autoLoadClicked(bool checked)
@@ -222,65 +275,6 @@ void SubPicture::apply()
 {
     update(textX->text().toInt(), textY->text().toInt(), textW->text().toInt(), textH->text().toInt());
     denominator = ZOOM_FACTOR * codec_width / (float) w;
-}
-
-void SubPicture::keyReleaseEvent(QKeyEvent *event)
-{
-    if (event->isAutoRepeat())
-        return;
-
-    if (event->modifiers() & Qt::ControlModifier) {
-        switch (event->key()) {
-        case Qt::Key_Semicolon:
-            stop();
-            break;
-        case Qt::Key_Apostrophe:
-            stop();
-            break;
-        case Qt::Key_BracketLeft:
-            stop();
-            break;
-        case Qt::Key_Slash:
-            stop();
-            break;
-        case Qt::Key_Comma:
-            stop();
-            break;
-        case Qt::Key_Period:
-            stop();
-            break;
-        }
-    }
-}
-
-void SubPicture::keyPressEvent(QKeyEvent *event)
-{
-
-    if (event->isAutoRepeat())
-        return;
-
-    if (event->modifiers() & Qt::ControlModifier) {
-        switch (event->key()) {
-        case Qt::Key_Semicolon:
-            move(-1, 0, 0);
-            break;
-        case Qt::Key_Apostrophe:
-            move(1, 0, 0);
-            break;
-        case Qt::Key_BracketLeft:
-            move(0, 1, 0);
-            break;
-        case Qt::Key_Slash:
-            move(0, -1, 0);
-            break;
-        case Qt::Key_Comma:
-            move(0, 0, 1);
-            break;
-        case Qt::Key_Period:
-            move(0, 0, -1);
-            break;
-        }
-    }
 }
 
 void SubPicture::update(int x_arg, int y_arg, int w_arg, int h_arg)

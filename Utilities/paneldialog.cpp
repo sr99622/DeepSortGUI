@@ -22,7 +22,9 @@
 #include "paneldialog.h"
 #include "mainwindow.h"
 
-PanelDialog::PanelDialog(QMainWindow *parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+#define dialog_window_flags Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint
+
+PanelDialog::PanelDialog(QMainWindow *parent) : QDialog(parent, dialog_window_flags)
 {
     mainWindow = parent;
     timer = new QTimer(this);
@@ -30,7 +32,7 @@ PanelDialog::PanelDialog(QMainWindow *parent) : QDialog(parent, Qt::WindowSystem
     timer->start(10000);
 }
 
-PanelDialog::PanelDialog(QMainWindow *parent, const QString& settingsKey)  : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+PanelDialog::PanelDialog(QMainWindow *parent, const QString& settingsKey)  : QDialog(parent, dialog_window_flags)
 {
     mainWindow = parent;
     this->settingsKey = settingsKey;

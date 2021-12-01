@@ -53,6 +53,7 @@ class Track
         vector is added to this list.
 
     """*/
+
     enum TrackState {Tentative = 1, Confirmed, Deleted};
 
 public:

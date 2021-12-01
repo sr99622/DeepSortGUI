@@ -116,8 +116,7 @@ public:
     ControlPanel *control();
     FilterPanel *filter();
     ParameterPanel *parameter();
-    //CountPanel *count();
-    QLabel *display();
+    DisplayLabel *display();
     DisplayContainer *dc();
 
     QString filename;

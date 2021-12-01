@@ -41,8 +41,6 @@ public:
     SubPicture(QMainWindow *parent);
 
     void filter(Frame *vp) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
     void ptz();
 
     Frame sub_frame;
@@ -90,9 +88,6 @@ public:
 
     int codec_width = 0, codec_height = 0;
 
-//signals:
-//    void msg(const QString&);
-
 public slots:
     void move(int p, int t, int z);
     void stop();
@@ -102,6 +97,8 @@ public slots:
     void preset(int arg);
     void autoPresetChanged(int index);
     void autoLoadClicked(bool);
+    void wheelZoom(QWheelEvent*);
+    void mouseMove(const QPointF&);
 
 };
 
