@@ -23,8 +23,6 @@ public:
             std::vector<Track>& tracks,
             const DETECTIONS& detections,
             std::vector<int> &track_indices);
-            //,
-            //std::vector<int> detection_indices = std::vector<int>());
 
     TRACKER_MATCHED min_cost_matching(
             tracker* distance_metric,

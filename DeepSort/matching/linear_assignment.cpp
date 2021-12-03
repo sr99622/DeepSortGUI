@@ -22,65 +22,62 @@ linear_assignment::matching_cascade(
         std::vector<Track> &tracks,
         const DETECTIONS &detections,
         std::vector<int>& track_indices)
-        //,
-        //std::vector<int> detection_indices)
 {
-    TRACKER_MATCHED res;
 
+    TRACKER_MATCHED result;
     std::vector<int> unmatched_detections;
     for(size_t i = 0; i < detections.size(); i++) {
-        //detection_indices.push_back(int(i));
         unmatched_detections.push_back(int(i));
     }
 
-    //std::vector<int> unmatched_detections;
-    //unmatched_detections.assign(detection_indices.begin(), detection_indices.end());
-    //std::vector<int> unmatched_detections = detection_indices;
-
-    res.matches.clear();
-    std::vector<int> track_indices_l;
+    std::vector<int> level_track_indices;
 
     std::map<int, int> matches_trackid;
     for (int level = 0; level < cascade_depth; level++) {
         if (unmatched_detections.size() == 0)
-            break; //No detections left;
+            break;
 
-        track_indices_l.clear();
+        level_track_indices.clear();
         for (int k : track_indices) {
-            if (tracks[k].time_since_update == 1+level)
-                track_indices_l.push_back(k);
+            if (tracks[k].time_since_update == level + 1)
+                level_track_indices.push_back(k);
         }
 
-        if (track_indices_l.size() == 0)
-            continue; //Nothing to match at this level.
+        if (level_track_indices.size() == 0)
+            continue;
 
         TRACKER_MATCHED tmp = min_cost_matching(
-                    distance_metric, distance_metric_func,
-                    max_distance, tracks, detections, track_indices_l,
+                    distance_metric,
+                    distance_metric_func,
+                    max_distance,
+                    tracks,
+                    detections,
+                    level_track_indices,
                     unmatched_detections);
 
-        unmatched_detections.assign(tmp.unmatched_detections.begin(), tmp.unmatched_detections.end());
+        unmatched_detections = tmp.unmatched_detections;
 
-        for(size_t i = 0; i < tmp.matches.size(); i++) {
+        for (size_t i = 0; i < tmp.matches.size(); i++) {
             MATCH_DATA pa = tmp.matches[i];
-            res.matches.push_back(pa);
+            result.matches.push_back(pa);
             matches_trackid.insert(pa);
         }
     }
 
-    res.unmatched_detections.assign(unmatched_detections.begin(), unmatched_detections.end());
+    result.unmatched_detections = unmatched_detections;
 
     for (size_t i = 0; i < track_indices.size(); i++) {
         int tid = track_indices[i];
         if (matches_trackid.find(tid) == matches_trackid.end())
-            res.unmatched_tracks.push_back(tid);
+            result.unmatched_tracks.push_back(tid);
     }
 
-    return res;
+    return result;
 }
 
 TRACKER_MATCHED
-linear_assignment::min_cost_matching(tracker *distance_metric,
+linear_assignment::min_cost_matching(
+        tracker *distance_metric,
         tracker::GATED_METRIC_FUNC distance_metric_func,
         float max_distance,
         std::vector<Track> &tracks,
@@ -88,12 +85,13 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
         std::vector<int> &track_indices,
         std::vector<int> &detection_indices)
 {
-    TRACKER_MATCHED res;
+
+    TRACKER_MATCHED result;
     if ((detection_indices.size() == 0) || (track_indices.size() == 0)) {
-        res.matches.clear();
-        res.unmatched_tracks.assign(track_indices.begin(), track_indices.end());
-        res.unmatched_detections.assign(detection_indices.begin(), detection_indices.end());
-        return res;
+        result.matches.clear();
+        result.unmatched_tracks = track_indices;
+        result.unmatched_detections = detection_indices;
+        return result;
     }
 
     DYNAMICM cost_matrix = (distance_metric->*(distance_metric_func))(
@@ -109,9 +107,9 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
 
     Eigen::Matrix<float, -1, 2, Eigen::RowMajor> indices = HungarianOper::Solve(cost_matrix);
 
-    res.matches.clear();
-    res.unmatched_tracks.clear();
-    res.unmatched_detections.clear();
+    result.matches.clear();
+    result.unmatched_tracks.clear();
+    result.unmatched_detections.clear();
 
     for (size_t col = 0; col < detection_indices.size(); col++) {
         bool flag = false;
@@ -123,7 +121,7 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
         }
 
         if (flag == false)
-            res.unmatched_detections.push_back(detection_indices[col]);
+            result.unmatched_detections.push_back(detection_indices[col]);
     }
 
     for (size_t row = 0; row < track_indices.size(); row++) {
@@ -135,7 +133,7 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
             }
         }
         if (flag == false)
-            res.unmatched_tracks.push_back(track_indices[row]);
+            result.unmatched_tracks.push_back(track_indices[row]);
     }
 
     for (int i = 0; i < indices.rows(); i++) {
@@ -145,15 +143,15 @@ linear_assignment::min_cost_matching(tracker *distance_metric,
         int track_idx = track_indices[row];
         int detection_idx = detection_indices[col];
         if (cost_matrix(row, col) > max_distance) {
-            res.unmatched_tracks.push_back(track_idx);
-            res.unmatched_detections.push_back(detection_idx);
+            result.unmatched_tracks.push_back(track_idx);
+            result.unmatched_detections.push_back(detection_idx);
         }
         else {
-            res.matches.push_back(std::make_pair(track_idx, detection_idx));
+            result.matches.push_back(std::make_pair(track_idx, detection_idx));
         }
     }
 
-    return res;
+    return result;
 }
 
 DYNAMICM
@@ -164,7 +162,8 @@ linear_assignment::gate_cost_matrix(
         const DETECTIONS &detections,
         const std::vector<int> &track_indices,
         const std::vector<int> &detection_indices,
-        float gated_cost, bool only_position)
+        float gated_cost,
+        bool only_position)
 {
     int gating_dim = (only_position == true ? 2 : 4);
     double gating_threshold = KalmanFilter::chi2inv95[gating_dim];

@@ -137,7 +137,7 @@ KalmanFilter::gating_distance(
 
     DETECTBOXES d(measurements.size(), 4);
     int pos = 0;
-    for(DETECTBOX box:measurements) {        
+    for (DETECTBOX box : measurements) {
         d.row(pos++) = box - mean1;
     }
     Eigen::Matrix<float, -1, -1, Eigen::RowMajor> factor = covariance1.llt().matrixL();

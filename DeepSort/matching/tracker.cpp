@@ -87,7 +87,8 @@ void tracker::_match(const DETECTIONS &detections, TRACKER_MATCHED &res)
     }
 
     TRACKER_MATCHED matcha = linear_assignment::getInstance()->matching_cascade(
-                this, &tracker::gated_metric,
+                this,
+                &tracker::gated_metric,
                 this->metric->matching_threshold,
                 this->max_age,
                 this->tracks,
@@ -97,7 +98,7 @@ void tracker::_match(const DETECTIONS &detections, TRACKER_MATCHED &res)
     std::vector<int> iou_track_candidates = unconfirmed_tracks;
     for (auto it = matcha.unmatched_tracks.begin(); it != matcha.unmatched_tracks.end();) {
         int idx = *it;
-        if (tracks[idx].time_since_update == 1) { //push into unconfirmed
+        if (tracks[idx].time_since_update == 1) {
             iou_track_candidates.push_back(idx);
             matcha.unmatched_tracks.erase(it);
             continue;
@@ -116,7 +117,8 @@ void tracker::_match(const DETECTIONS &detections, TRACKER_MATCHED &res)
     */
 
     TRACKER_MATCHED matchb = linear_assignment::getInstance()->min_cost_matching(
-                this, &tracker::iou_cost,
+                this,
+                &tracker::iou_cost,
                 this->max_iou_distance,
                 this->tracks,
                 detections,
