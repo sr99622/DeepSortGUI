@@ -106,7 +106,7 @@ int Decoder::decode_frame(AVFrame* frame, AVSubtitle* sub)
 			}
 			else {
 				if (avcodec_send_packet(avctx, &pkt1) == AVERROR(EAGAIN)) {
-                    cout << "Receive_frame and send_packet both returned EAGAIN, which is an API violation.\n" << endl;
+                    std::cout << "Receive_frame and send_packet both returned EAGAIN, which is an API violation.\n" << std::endl;
 					packet_pending = 1;
 					av_packet_move_ref(&pkt, &pkt1);
 				}

@@ -8,8 +8,6 @@
 #include <exception>
 #include <stdexcept>
 
-using namespace std;
-
 /*
 enum cudaFamily {
     Cuda,

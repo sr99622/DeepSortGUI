@@ -34,7 +34,7 @@ FilterChain::~FilterChain()
 
 void FilterChain::process(Frame *vp)
 {
-    auto start = high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
     if (!counting) {
         t1 = start;
@@ -76,10 +76,10 @@ void FilterChain::process(Frame *vp)
             panel->leftModel->filters[i]->filter(vp);
     }
 
-    auto stop = high_resolution_clock::now();
-    long msec = duration_cast<milliseconds>(stop - start).count();
+    auto stop = std::chrono::high_resolution_clock::now();
+    long msec = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
 
-    long interval = duration_cast<milliseconds>(stop - t1).count();
+    long interval = std::chrono::duration_cast<std::chrono::milliseconds>(stop - t1).count();
     if (interval > 1000) {
         counting = false;
         float fps = 1000 * count / (float)interval;

@@ -237,7 +237,7 @@ void ControlPanel::restoreEngageSetting()
 
 void ControlPanel::test()
 {
-    cout << "ControlPanel::test" << endl;
+    std::cout << "ControlPanel::test" << std::endl;
 }
 
 void ControlPanel::singlestep()

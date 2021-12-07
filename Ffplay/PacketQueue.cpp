@@ -2,8 +2,6 @@
 
 #include "PacketQueue.h"
 
-using namespace std;
-
 PacketQueue::PacketQueue()
 {
 	memset(this, 0, sizeof(PacketQueue));
@@ -25,13 +23,13 @@ int PacketQueue::init()
     mutex = SDL_CreateMutex();
     if (!mutex) {
         //av_log(NULL, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
-        cout << "SDL_CreateMutex error: " << SDL_GetError() << endl;
+        std::cout << "SDL_CreateMutex error: " << SDL_GetError() << std::endl;
 		return AVERROR(ENOMEM);
 	}
     cond = SDL_CreateCond();
     if (!cond) {
         //av_log(NULL, AV_LOG_FATAL, "SDL_CreateCond(): %s\n", SDL_GetError());
-        cout << "SDL_CreateCond error: " << SDL_GetError() << endl;
+        std::cout << "SDL_CreateCond error: " << SDL_GetError() << std::endl;
 		return AVERROR(ENOMEM);
 	}
     return 0;

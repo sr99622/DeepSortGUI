@@ -21,6 +21,11 @@ int audioThread(void* opaque)
     return ((VideoState*)opaque)->audio_thread();
 }
 
+static int subtitleThread(void* opaque)
+{
+    return static_cast<VideoState*>(opaque)->subtitle_thread();
+}
+
 void sdlAudioCallback(void* opaque, Uint8* stream, int len)
 {
     ((VideoState*)opaque)->sdl_audio_callback(stream, len);
@@ -1376,12 +1381,6 @@ the_end:
     return 0;
 }
 
-static int subtitleThread(void* opaque)
-{
-    return static_cast<VideoState*>(opaque)->subtitle_thread();
-}
-
-
 int VideoState::subtitle_thread()
 {
     Frame* sp;
@@ -2213,18 +2212,18 @@ int VideoState::readStreamData(void *opaque, uint8_t *buffer, int size)
     StreamData *data = (StreamData*)opaque;
 
     /**/
-    cout << "readStreamData size: " << size
+    std::cout << "readStreamData size: " << size
          << " position: " << data->position
          << " data size: " << data->size()
          << " arg size: " << size
-         << endl;
+         << std::endl;
     /**/
 
     int length = size;
     if (data->position + size > data->size())
         length = data->size() - data->position;
 
-    cout << "length: " << length << endl;
+    std::cout << "length: " << length << std::endl;
 
     memcpy(buffer, (uint8_t*)data->mid(data->position, length).data(), size);
     data->position += length;

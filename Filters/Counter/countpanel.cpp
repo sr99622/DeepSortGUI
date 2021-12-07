@@ -148,14 +148,14 @@ void CountPanel::feed(const CounterFrame& frame)
 
         int indexSum = indexForSums(obj_id);
         if (indexSum < 0) {
-            sums.push_back(make_pair(obj_id, 1));
+            sums.push_back(std::make_pair(obj_id, 1));
         }
         else {
             sums[indexSum].second++;
         }
     }
 
-    for (const pair<int, int>& sum : sums) {
+    for (const std::pair<int, int>& sum : sums) {
         int row = rowOf(sum.first);
         if (row > -1) {
             table->item(row, 1)->setText(QString::number(sum.second));
@@ -199,10 +199,10 @@ void CountPanel::timeout()
     QTextStream out(file);
     out << QTime::currentTime().toString("hh:mm:ss") << ", ";
     out << MW->is->formatTime(MW->is->get_master_clock());
-    sort(counts.begin(), counts.end(), [](const pair<int, std::vector<int>>& left, const pair<int, std::vector<int>>& right) {
+    sort(counts.begin(), counts.end(), [](const std::pair<int, std::vector<int>>& left, const std::pair<int, std::vector<int>>& right) {
         return left.first < right.first;
     });
-    for (pair<int, std::vector<int>>& count : counts) {
+    for (std::pair<int, std::vector<int>>& count : counts) {
         int row = rowOf(count.first);
         if (row > -1) {
             int samples = count.second.size();

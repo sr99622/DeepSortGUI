@@ -70,7 +70,7 @@ void Yolo::loaderCallback(int arg)
 void Yolo::setNames(const QString& path)
 {
     obj_names.clear();
-    ifstream file(path.toStdString());
+    std::ifstream file(path.toStdString());
     if (!file.is_open()) {
         QString str;
         QTextStream(&str) << "Unable to load model names file: " << path;
@@ -79,7 +79,7 @@ void Yolo::setNames(const QString& path)
     }
 
     obj_names.clear();
-    for (string line; getline(file, line);) {
+    for (std::string line; getline(file, line);) {
         obj_names.push_back(line);
         std::cout << "names: " << line << std::endl;
     }

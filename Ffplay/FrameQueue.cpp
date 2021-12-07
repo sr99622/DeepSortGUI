@@ -2,8 +2,6 @@
 
 #include "FrameQueue.h"
 
-using namespace std;
-
 FrameQueue::FrameQueue()
 {
 	memset(this, 0, sizeof(FrameQueue));
@@ -32,7 +30,7 @@ int FrameQueue::init(PacketQueue* pktq, int max_size, int keep_last)
 	}
 
     this->pktq = pktq;
-    this->max_size = min(max_size, FRAME_QUEUE_SIZE);
+    this->max_size = std::min(max_size, FRAME_QUEUE_SIZE);
     this->keep_last = !!keep_last;
     for (int i = 0; i < this->max_size; i++)
         if (!(queue[i].frame = av_frame_alloc()))

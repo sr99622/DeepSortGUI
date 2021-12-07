@@ -6,8 +6,6 @@
 #include <tchar.h>
 #include <windows.h>
 
-using namespace std;
-
 #define BUFSIZE 8192
 
 HANDLE stdInRead;
@@ -42,27 +40,27 @@ void StreamPanel::test()
     sa.lpSecurityDescriptor = NULL;
 
     if (!CreatePipe(&stdOutRead, &stdOutWrite, &sa, 0)) {
-        cout << "stdOut create pipe error: " << GetLastError() << endl;
+        std::cout << "stdOut create pipe error: " << GetLastError() << std::endl;
     }
 
     if (!SetHandleInformation(stdOutRead, HANDLE_FLAG_INHERIT, 0)) {
-        cout << "stdOut set handle information: " << GetLastError() << endl;
+        std::cout << "stdOut set handle information: " << GetLastError() << std::endl;
     }
 
     if (!CreatePipe(&stdInRead, &stdInWrite, &sa, 0)) {
-        cout << "stdIn create pipe error: " << GetLastError() << endl;
+        std::cout << "stdIn create pipe error: " << GetLastError() << std::endl;
     }
 
     if (!SetHandleInformation(stdInWrite, HANDLE_FLAG_INHERIT, 0)) {
-        cout << "stdIn set handle information: " << GetLastError() << endl;
+        std::cout << "stdIn set handle information: " << GetLastError() << std::endl;
     }
 
     if (!CreatePipe(&stdErrRead, &stdErrWrite, &sa, 0)) {
-        cout << "StdErr create pipe error: " << GetLastError() << endl;
+        std::cout << "StdErr create pipe error: " << GetLastError() << std::endl;
     }
 
     if (!SetHandleInformation(stdErrRead, HANDLE_FLAG_INHERIT, 0)) {
-        cout << "stdErr set handle information: " << GetLastError() << endl;
+        std::cout << "stdErr set handle information: " << GetLastError() << std::endl;
     }
 
     STARTUPINFO si;
@@ -83,7 +81,7 @@ void StreamPanel::test()
 
     //if (!CreateProcess(name, arg, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
     if (!CreateProcess(name, arg, NULL, NULL, FALSE, NULL, NULL, NULL, &si, &pi)) {
-        cout << "CreateProcess failed: " << GetLastError() << endl;
+        std::cout << "CreateProcess failed: " << GetLastError() << std::endl;
     }
     else {
         CloseHandle(pi.hProcess);
@@ -137,7 +135,7 @@ void Streamer::run()
             array.resize(dwRead);
             memcpy(array.data(), chBuf, dwRead);
             ((StreamPanel*)panel)->data += array;
-            cout << "data size: " << ((StreamPanel*)panel)->data.size() << endl;
+            std::cout << "data size: " << ((StreamPanel*)panel)->data.size() << std::endl;
             if (bFirstPass && ((StreamPanel*)panel)->data.size() > 1000000) {
                 ((StreamPanel*)panel)->emit play();
                 bFirstPass = FALSE;

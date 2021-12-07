@@ -48,7 +48,8 @@ void Frame::allocateFrame(int width, int height, const AVPixelFormat& pix_fmt)
     frame->width = width;
     frame->height = height;
     frame->format = pix_fmt;
-    av_frame_get_buffer(frame, 32);
+    //av_frame_get_buffer(frame, 32);
+    av_frame_get_buffer(frame, 0);
     av_frame_make_writable(frame);
     this->width = width;
     this->height = height;
@@ -154,14 +155,14 @@ void Frame::drawBox(const QRect &rect, int line_width, const YUVColor &color)
         int t = border.top();
         int b = border.bottom();
 
-        l = min(l, width-1);
-        l = max(l, 0);
-        r = min(r, width-1);
-        r = max(r, 0);
-        t = min(t, height-1);
-        t = max(t, 0);
-        b = min(b, height-1);
-        b = max(b, 0);
+        l = std::min(l, width-1);
+        l = std::max(l, 0);
+        r = std::min(r, width-1);
+        r = std::max(r, 0);
+        t = std::min(t, height-1);
+        t = std::max(t, 0);
+        b = std::min(b, height-1);
+        b = std::max(b, 0);
 
         for (int y = t; y < b; y++) {
             fillPixel(l, y, color);
@@ -201,8 +202,8 @@ cv::Mat Frame::hwToMat()
 
         eh.ck(cudaMemcpy(bgr.data, pBGR, sizeof(Npp8u) * ch * ff, cudaMemcpyDeviceToHost));
     }
-    catch (const exception &e) {
-        cout << e.what() << endl;
+    catch (const std::exception &e) {
+        std::cout << e.what() << std::endl;
     }
 
     return bgr;
@@ -231,8 +232,8 @@ void Frame::hwReadMat(const cv::Mat& mat)
         eh.ck(cudaMemcpy(frame->data[1], pYUV[1], hs, cudaMemcpyDeviceToHost), "cudaMemcpy");
         eh.ck(cudaMemcpy(frame->data[2], pYUV[2], hs, cudaMemcpyDeviceToHost), "cudaMemcpy");
     }
-    catch (const exception &e) {
-        cout << e.what() << endl;
+    catch (const std::exception &e) {
+        std::cout << e.what() << std::endl;
     }
 }
 

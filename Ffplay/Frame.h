@@ -18,8 +18,6 @@ extern "C" {
 #include "Utilities/yuvcolor.h"
 #include "Utilities/cudaexception.h"
 
-using namespace std;
-
 class Frame : public QObject
 {
     Q_OBJECT

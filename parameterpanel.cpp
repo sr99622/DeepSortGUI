@@ -162,7 +162,7 @@ void ParameterPanel::applyStyle(const ColorProfile& profile)
 
 void ParameterPanel::comboActivated(int index)
 {
-    cout << "ParameterPanel::comboActivated" << endl;
+    std::cout << "ParameterPanel::comboActivated" << std::endl;
 }
 
 void ParameterPanel::itemChanged(QListWidgetItem *item)
@@ -226,7 +226,7 @@ void ParameterPanel::restoreSettings()
 void ParameterPanel::itemDoubleClicked(QListWidgetItem *item)
 {
     QString arg = ((StoredOption*)item)->arg;
-    cout << "ParameterPanel::itemDoubleClicked arg: " << arg.toStdString() << endl;
+    std::cout << "ParameterPanel::itemDoubleClicked arg: " << arg.toStdString() << std::endl;
     bool reading = true;
     int stop = -1;
     while (reading) {
@@ -245,8 +245,8 @@ void ParameterPanel::itemDoubleClicked(QListWidgetItem *item)
                 bool ok;
                 double raw_value = QString(cmd_arg.toLatin1().data()).toDouble(&ok);
                 if (!ok) {
-                    cout << "ParameterPanel::itemDoubleClicked number parse failure: "
-                         << cmd_name.toStdString() << " " << cmd_arg.toStdString() << endl;
+                    std::cout << "ParameterPanel::itemDoubleClicked number parse failure: "
+                         << cmd_name.toStdString() << " " << cmd_arg.toStdString() << std::endl;
                     return;
                 }
                 int cmd_value = raw_value / 1000000;
@@ -263,7 +263,7 @@ void ParameterPanel::itemDoubleClicked(QListWidgetItem *item)
 
 void ParameterPanel::saveCmdLine()
 {
-    cout << "ParameterPanel::saveCmdLine" << cmdLineEquiv->text().toStdString() << endl;
+    std::cout << "ParameterPanel::saveCmdLine" << cmdLineEquiv->text().toStdString() << std::endl;
 
     if (cmdLineEquiv->text().length() == 0) {
         QMessageBox::warning(this, "playqt", "No command line is currently set");
@@ -289,7 +289,7 @@ const QString ParameterPanel::getOptionStorageString()
 {
     QString arg;
     for (int i = 0; i < saved_options.size(); i++) {
-        cout << "number of saved options: " << saved_options.size() << endl;
+        std::cout << "number of saved options: " << saved_options.size() << std::endl;
         OptionDef option = saved_options[i];
         QTextStream(&arg) << option.name;
         if (option.flags & OPT_STRING) {
@@ -432,7 +432,7 @@ void ParameterPanel::setCmdLine()
                         for (int i = 0; i < arg; i++) {
                             QTextStream(&str) << " " << MW->co->vfilters_list[i];
                         }
-                        cout << endl;
+                        std::cout << std::endl;
                     }
                 }
             }
@@ -465,8 +465,8 @@ void ParameterPanel::set()
 
 void ParameterPanel::set(int option_index, QString option_arg)
 {
-    cout << "option_index: " << option_index << endl;
-    cout << "description: " << options->currentText().toStdString() << endl;
+    std::cout << "option_index: " << option_index << std::endl;
+    std::cout << "description: " << options->currentText().toStdString() << std::endl;
 
     if (option_index < 0) {
         QMessageBox::warning(this, "playqt", "No option specified, please select an option from the drop down box");
@@ -477,27 +477,27 @@ void ParameterPanel::set(int option_index, QString option_arg)
         QMessageBox::warning(this, "playqt", "Incomplete parameter specification.  Arguments are required for all parameters");
         return;
     }
-    cout << "option_arg: " << option_arg.toStdString() << endl;
+    std::cout << "option_arg: " << option_arg.toStdString() << std::endl;
 
     const QString str(option_arg);
     char *arg = str.toLatin1().data();
 
-    cout << "str: " << str.toStdString() << endl;
+    std::cout << "str: " << str.toStdString() << std::endl;
 
     OptionDef *po = &MW->co->options[option_index];
     void *dst = po->u.dst_ptr;
     const char *opt = po->name;
     QString name(opt);
-    cout << "opt: " << name.toStdString() << endl;
+    std::cout << "opt: " << name.toStdString() << std::endl;
     bool ok;
 
     if (po->flags & OPT_STRING) {
-        cout << "OPT_STRING" << endl;
+        std::cout << "OPT_STRING" << std::endl;
         av_freep(dst);
         *(char **)dst = av_strdup(str.toLatin1().data());
     }
     else if (po->flags & OPT_BOOL || po->flags & OPT_INT) {
-        cout << "OPT_BOOL" << endl;
+        std::cout << "OPT_BOOL" << std::endl;
         char *dummy = option_arg.toLatin1().data();
         QString tmp(dummy);
         tmp.toInt(&ok);
@@ -508,7 +508,7 @@ void ParameterPanel::set(int option_index, QString option_arg)
         *(int *)dst = parse_number_or_die(opt, tmp.toLatin1().data(), OPT_INT64, INT_MIN, INT_MAX);
     }
     else if (po->flags & OPT_INT64) {
-        cout << "OPT_INT64" << endl;
+        std::cout << "OPT_INT64" << std::endl;
         QString(arg).toLong(&ok);
         if (!ok) {
             QMessageBox::warning(this, "playqt", QString("Incorrect format %1 is not a number").arg(arg));
@@ -517,7 +517,7 @@ void ParameterPanel::set(int option_index, QString option_arg)
         *(int64_t *)dst = parse_number_or_die(opt, arg, OPT_INT64, INT64_MIN, INT64_MAX);
     }
     else if (po->flags & OPT_TIME) {
-        cout << "OPT_TIME" << endl;
+        std::cout << "OPT_TIME" << std::endl;
         QString(arg).toLong(&ok);
         if (!ok) {
             QMessageBox::warning(this, "playqt", QString("Incorrect format %1 is not a number").arg(arg));
@@ -526,7 +526,7 @@ void ParameterPanel::set(int option_index, QString option_arg)
         *(int64_t *)dst = parse_time_or_die(opt, arg, 1);
     }
     else if (po->flags & OPT_FLOAT) {
-        cout << "OPT_FLOAT" << endl;
+        std::cout << "OPT_FLOAT" << std::endl;
         QString(arg).toFloat(&ok);
         if (!ok) {
             QMessageBox::warning(this, "playqt", QString("Incorrect format %1 is not a number").arg(arg));
@@ -535,7 +535,7 @@ void ParameterPanel::set(int option_index, QString option_arg)
         *(float *)dst = parse_number_or_die(opt, arg, OPT_FLOAT, -INFINITY, INFINITY);
     }
     else if (po->flags & OPT_DOUBLE) {
-        cout << "OPT_DOUBLE" << endl;
+        std::cout << "OPT_DOUBLE" << std::endl;
         QString(arg).toDouble(&ok);
         if (!ok) {
             QMessageBox::warning(this, "playqt", QString("Incorrect format %1 is not a number").arg(arg));
@@ -545,8 +545,8 @@ void ParameterPanel::set(int option_index, QString option_arg)
     }
 
     else if (po->u.func_arg) {
-        cout << "FUNC ARG: " << endl;
-        cout << "str: " << str.toStdString() << endl;
+        std::cout << "FUNC ARG: " << std::endl;
+        std::cout << "str: " << str.toStdString() << std::endl;
         if (name == "ss" || name == "t") {
             str.toFloat(&ok);
             if (!ok) {
@@ -555,24 +555,24 @@ void ParameterPanel::set(int option_index, QString option_arg)
             }
         }
         else if (name == "vf") {
-            cout << "VIDEO FILTER" << endl;
-            cout << "str: " << str.toStdString() << endl;
+            std::cout << "VIDEO FILTER" << std::endl;
+            std::cout << "str: " << str.toStdString() << std::endl;
             QString base;
             int index = str.indexOf("=");
             if (index > -1)
                 base = str.mid(0, index);
             else
                 base = str;
-            cout << "base: ----" << base.toStdString() << "---" << endl;
+            std::cout << "base: ----" << base.toStdString() << "---" << std::endl;
 
             if (!filters.contains(base.toLatin1().data())) {
-                cout << filters.toStdString() << endl;
+                std::cout << filters.toStdString() << std::endl;
                 QMessageBox::warning(this, "PlayQT", QString("Filter %1 not found").arg(str));
                 return;
             }
         }
 
-        cout << "arg: " << arg << endl;
+        std::cout << "arg: " << arg << std::endl;
 
         int ret = po->u.func_arg(NULL, opt, str.toLatin1().data());
         if (ret < 0) {
@@ -699,7 +699,7 @@ void SavedCmdLines::remove()
         MW->parameter()->saveSettings();
         MW->parameter()->fillAutoCmds();
 
-        cout << "currentAutoCmd: " << MW->parameter()->currentAutoCmd.toStdString() << endl;
+        std::cout << "currentAutoCmd: " << MW->parameter()->currentAutoCmd.toStdString() << std::endl;
 
         MW->parameter()->cmds->setCurrentText(MW->parameter()->currentAutoCmd);
         if (MW->parameter()->currentAutoCmd.length() == 0) {

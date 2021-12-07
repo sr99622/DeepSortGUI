@@ -70,9 +70,7 @@ extern "C" {
 #define GACC   36
 #define AFIF   37
 
-using namespace std;
-
-class AVException : public exception
+class AVException : public std::exception
 {
 
 public:

@@ -61,8 +61,6 @@ enum CustomEventCode {
 #define APP_DEFAULT_WIDTH 1200
 #define APP_DEFAULT_HEIGHT 600
 
-using namespace std;
-
 #define MW dynamic_cast<MainWindow*>(mainWindow)
 #define TS QTime::currentTime().toString("hh:mm:ss.zzz").toStdString()
 

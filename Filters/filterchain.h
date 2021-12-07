@@ -30,8 +30,6 @@
 
 #include <chrono>
 
-using namespace std::chrono;
-
 class FilterChain : public QObject
 {
     Q_OBJECT
@@ -49,7 +47,7 @@ public:
     Kalman k_fps;
     bool counting = false;
     int count = 0;
-    high_resolution_clock::time_point t1;
+    std::chrono::high_resolution_clock::time_point t1;
     bool disengaged = false;
 
 public slots:

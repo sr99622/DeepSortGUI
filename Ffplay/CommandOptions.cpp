@@ -462,28 +462,28 @@ void CommandOptions::show_log_level(int log_level)
 {
     switch (log_level) {
     case AV_LOG_QUIET:
-        cout << "AV_LOG_QUIET" <<endl;
+        std::cout << "AV_LOG_QUIET" <<std::endl;
         break;
     case AV_LOG_PANIC:
-        cout << "AV_LOG_PANIC" <<endl;
+        std::cout << "AV_LOG_PANIC" << std::endl;
         break;
     case AV_LOG_FATAL:
-        cout << "AV_LOG_FATAL" <<endl;
+        std::cout << "AV_LOG_FATAL" << std::endl;
         break;
     case AV_LOG_ERROR:
-        cout << "AV_LOG_ERROR" <<endl;
+        std::cout << "AV_LOG_ERROR" << std::endl;
         break;
     case AV_LOG_WARNING:
-        cout << "AV_LOG_WARNING" <<endl;
+        std::cout << "AV_LOG_WARNING" << std::endl;
         break;
     case AV_LOG_VERBOSE:
-        cout << "AV_LOG_VERBOSE" <<endl;
+        std::cout << "AV_LOG_VERBOSE" << std::endl;
         break;
     case AV_LOG_DEBUG:
-        cout << "AV_LOG_DEBUG" <<endl;
+        std::cout << "AV_LOG_DEBUG" << std::endl;
         break;
     case AV_LOG_TRACE:
-        cout << "AV_LOG_TRACE" <<endl;
+        std::cout << "AV_LOG_TRACE" << std::endl;
         break;
     }
 }
@@ -626,7 +626,7 @@ int CommandOptions::opt_add_vfilter(void* optctx, const char* opt, const char* a
 
     if (strlen(arg) == 0) {
         for (int i = nb_vfilters - 1; i > -1; i--) {
-            cout << vfilters_list[i] << endl;
+            std::cout << vfilters_list[i] << std::endl;
             av_free(&vfilters_list[i]);
         }
 

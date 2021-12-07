@@ -8,14 +8,14 @@ CudaExceptionHandler::CudaExceptionHandler()
 void CudaExceptionHandler::ck(const cudaError& ce, const QString& note)
 {
     if (ce != cudaSuccess)
-        throw runtime_error((QString(cudaGetErrorString(ce)) + " - " + note).toStdString());
+        throw std::runtime_error((QString(cudaGetErrorString(ce)) + " - " + note).toStdString());
 
 }
 
 void CudaExceptionHandler::ck(const NppStatus& status, const QString& note)
 {
     if (status != NPP_NO_ERROR)
-        throw runtime_error((getErrorText(status) + " - " + note).toStdString());
+        throw std::runtime_error((getErrorText(status) + " - " + note).toStdString());
 }
 
 /*

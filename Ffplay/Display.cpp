@@ -128,7 +128,7 @@ int Display::upload_texture(SDL_Texture** tex, AVFrame* frame, struct SwsContext
                 frame->data[2] + frame->linesize[2] * (AV_CEIL_RSHIFT(frame->height, 1) - 1), -frame->linesize[2]);
         }
         else {
-            cout << "Mixed negative and positive linesizes are not supported.\n" << endl;
+            std::cout << "Mixed negative and positive linesizes are not supported.\n" << std::endl;
             return -1;
         }
         break;

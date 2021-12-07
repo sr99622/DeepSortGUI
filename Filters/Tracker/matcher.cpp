@@ -153,12 +153,12 @@ void Matcher::checkDisplayClicked()
             scaledPos = QPoint(x1, y1);
         }
 
-        std::vector<pair<int, QRect>> rects;
+        std::vector<std::pair<int, QRect>> rects;
         for (RESULT_DATA result : imageFrames[2].result) {
             DETECTBOX box = result.second;
             QRect rect(box[IDX_X], box[IDX_Y], box[IDX_W], box[IDX_H]);
             if (rect.contains(scaledPos))
-                rects.push_back(make_pair(result.first, rect));
+                rects.push_back(std::make_pair(result.first, rect));
         }
 
         if (rects.size() > 0) {
@@ -200,7 +200,7 @@ void Matcher::fillFocusDialog()
                 try {
                     cv::resize(image, image, cv::Size(sizeRect.width(), sizeRect.height()));
                 }
-                catch (const exception& e) {
+                catch (const std::exception& e) {
                     std::cout << "Matcher::fillFocusDialog error: " << e.what() << std::endl;
                 }
             }
@@ -216,7 +216,7 @@ void Matcher::fillCropDialog()
     int rows = cropDialog->param->spinRows->value();
     int cols = cropDialog->param->spinCols->value();
     cv::Mat image(rows * crop_height, cols * crop_width, CV_8UC3, cv::Scalar(64, 64, 64));
-    size_t loop_end = min((size_t)rows * cols, imageFrames[2].result.size());
+    size_t loop_end = std::min((size_t)rows * cols, imageFrames[2].result.size());
 
     for (size_t i = 0; i < loop_end; i++) {
         int track_id = imageFrames[2].result[i].first;

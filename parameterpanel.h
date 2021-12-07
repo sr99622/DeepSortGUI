@@ -15,8 +15,6 @@
 #include "Ffplay/CommandOptions.h"
 #include "configpanel.h"
 
-using namespace std;
-
 class StoredOption : public QListWidgetItem
 {
 public:
@@ -63,7 +61,7 @@ public:
     QLabel *cmdLineEquiv;
     QLineEdit *cmdLineName;
     SavedCmdLines *savedCmdLines;
-    vector<OptionDef> saved_options;
+    std::vector<OptionDef> saved_options;
     QMenu *menu;
     QString filters;
 

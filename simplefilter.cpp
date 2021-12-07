@@ -94,8 +94,8 @@ void SimpleFilter::nppi_convert(Frame *vp)
 
         eh.ck(cudaFree(pBGR), "cudaFree");
     }
-    catch (const exception &e) {
-        cout << e.what() << endl;
+    catch (const std::exception &e) {
+        std::cout << e.what() << std::endl;
     }
 
 }
@@ -137,8 +137,8 @@ void SimpleFilter::box_filter(Frame *vp)
         eh.ck(cudaMemcpy(vp->frame->data[0], pSrc, sizeof(Npp8u) * frame_size, cudaMemcpyDeviceToHost), "Copy result from device to frame");
         eh.ck(cudaFree(pSrc));
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 }
 
@@ -166,18 +166,18 @@ void SimpleFilter::processGPU(Frame *vp)
         eh.ck(cudaFree(pNorm));;
         eh.ck(cudaFree(pSrc));
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 
     free(img.data);
-    cout << "complete" << endl;
+    std::cout << "complete" << std::endl;
 
 }
 
 void SimpleFilter::nppi_example(Frame *vp)
 {
-    cout << "processGPU" << endl;
+    std::cout << "processGPU" << std::endl;
     int width = vp->width;
     int height = vp->height;
     int frame_size = width * height;
@@ -190,21 +190,21 @@ void SimpleFilter::nppi_example(Frame *vp)
     try {
         NppStreamContext ctx = initializeNppStreamContext();
         eh.ck(nppiSumGetBufferHostSize_8u_C1R({width, height}, &nBufferSize));
-        cout << "nBufferSize: " << nBufferSize << endl;
+        std::cout << "nBufferSize: " << nBufferSize << std::endl;
         Npp8u *pDeviceBuffer;
         cudaMalloc((void**)(&pDeviceBuffer), nBufferSize);
         cudaMalloc((void**)(&pSum), sizeof(Npp64f));
 
         Npp8u *dSrc8uC1 = nppiMalloc_8u_C1(width, height, &pStepBytes_dSrc8uC1);
-        cout << "pStepBytes_dSrc8uC1: " << pStepBytes_dSrc8uC1 << endl;
+        std::cout << "pStepBytes_dSrc8uC1: " << pStepBytes_dSrc8uC1 << std::endl;
         eh.ck(cudaMemcpy(dSrc8uC1, vp->frame->data[0], sizeof(Npp8u) * frame_size, cudaMemcpyHostToDevice), "copy frame data to device");
         eh.ck(nppiSum_8u_C1R_Ctx(dSrc8uC1, pStepBytes_dSrc8uC1, {width, height}, pDeviceBuffer, pSum, ctx));
 
         eh.ck(cudaMemcpy(&nHostSum, pSum, sizeof(Npp64f), cudaMemcpyDeviceToHost), "retrieve results of sum");
-        cout << "nHostSum: " << nHostSum << endl;
+        std::cout << "nHostSum: " << nHostSum << std::endl;
 
         Npp32f *dSrc32fC1 = nppiMalloc_32f_C1(width, height, &pStepBytes_dSrc32fC1);
-        cout << "pStepBytes_dSrc32fC1: " << pStepBytes_dSrc32fC1 << endl;
+        std::cout << "pStepBytes_dSrc32fC1: " << pStepBytes_dSrc32fC1 << std::endl;
         eh.ck(nppsConvert_8u32f_Ctx(dSrc8uC1, dSrc32fC1, frame_size, ctx), "convert frame data to float");
 
         nppiFree(dSrc8uC1);
@@ -212,8 +212,8 @@ void SimpleFilter::nppi_example(Frame *vp)
         cudaFree(pDeviceBuffer);
         cudaFree(pSum);
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 }
 
@@ -232,7 +232,7 @@ void SimpleFilter::cuda_example(Frame *vp)
     int nBufferSize;
 
 
-    cout << "start" << endl;
+    std::cout << "start" << std::endl;
 
     try {
         eh.ck(nppsSumGetBufferSize_32f(frame_size, &nBufferSize), "Determine scratch buffer size needed for nppsSum");
@@ -245,14 +245,14 @@ void SimpleFilter::cuda_example(Frame *vp)
         eh.ck(nppsSum_32f(pDvcSrcFloat, frame_size, pSum, pDeviceBuffer), "nppsSum");
         eh.ck(cudaMemcpy(&nSumHost, pSum, sizeof(Npp32f), cudaMemcpyDeviceToHost), "Copy the result of nppsSum to host");
 
-        cout << "sum 1 = " << nSumHost << endl;
+        std::cout << "sum 1 = " << nSumHost << std::endl;
 
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 
-    cout << "first task complete" << endl;
+    std::cout << "first task complete" << std::endl;
 
     try {
         const Npp32f factor = 255.0f;
@@ -260,17 +260,17 @@ void SimpleFilter::cuda_example(Frame *vp)
         eh.ck(nppsSum_32f(pDvcSrcFloat, frame_size, pSum, pDeviceBuffer), "nppsSum");
         eh.ck(cudaMemcpy(&nSumHost, pSum, sizeof(Npp32f), cudaMemcpyDeviceToHost), "Copy the result of nppsSum to host");
 
-        cout << "sum 2 = " << nSumHost << endl;
+        std::cout << "sum 2 = " << nSumHost << std::endl;
 
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
 
     eh.ck(cudaFree(pDvcSrcFloat));;
     eh.ck(cudaFree(pDeviceBuffer));
     eh.ck(cudaFree(pDvcSrcUint));
-    cout << "complete" << endl;
+    std::cout << "complete" << std::endl;
 
 }
 
@@ -280,12 +280,12 @@ NppStreamContext SimpleFilter::initializeNppStreamContext()
     try {
         int device;
         eh.ck(cudaGetDevice(&device), "get current device");
-        cout << "device: " << device << endl;
+        std::cout << "device: " << device << std::endl;
         cudaDeviceProp prop;
         eh.ck(cudaGetDeviceProperties(&prop, device), "get device props");
-        cout << "name: " << prop.name << endl;
-        cout << "total mem: " << prop.totalGlobalMem << endl;
-        cout << "clock: " << prop.clockRate << endl;
+        std::cout << "name: " << prop.name << std::endl;
+        std::cout << "total mem: " << prop.totalGlobalMem << std::endl;
+        std::cout << "clock: " << prop.clockRate << std::endl;
 
         int major;
         int minor;
@@ -310,8 +310,8 @@ NppStreamContext SimpleFilter::initializeNppStreamContext()
 
 
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
     return npp_ctx;
 }
@@ -322,7 +322,7 @@ void SimpleFilter::test()
 
 void SimpleFilter::processCPU(Frame *vp)
 {
-    cout << "frame pts: " << vp->pts << endl;
+    std::cout << "frame pts: " << vp->pts << std::endl;
 
     if (img.data == NULL)
         img.data = (float*)malloc(sizeof(float) * vp->frame->width * vp->frame->height * 3);

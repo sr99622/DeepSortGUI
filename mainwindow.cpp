@@ -17,8 +17,8 @@ MainWindow::MainWindow(CommandOptions *co, QWidget *parent) : QMainWindow(parent
 
     screen = QApplication::primaryScreen();
     QRect screenSize = screen->geometry();
-    int w = min(APP_DEFAULT_WIDTH, screenSize.width());
-    int h = min(APP_DEFAULT_HEIGHT, screenSize.height());
+    int w = std::min(APP_DEFAULT_WIDTH, screenSize.width());
+    int h = std::min(APP_DEFAULT_HEIGHT, screenSize.height());
     int x = screenSize.center().x() - w/2;
     int y = screenSize.center().y() - h/2;
     QRect defaultGeometry(x, y, w, h);
@@ -219,7 +219,7 @@ void MainWindow::menuAction(QAction *action)
 void MainWindow::autoSave()
 {
     if (changed) {
-        cout << "MainWindow::autoSave" << endl;
+        std::cout << "MainWindow::autoSave" << std::endl;
         settings->setValue(geometryKey, saveGeometry());
         settings->setValue(splitterKey, splitter->saveState());
         changed = false;
@@ -399,7 +399,7 @@ void MainWindow::applyStyle(const ColorProfile& profile)
 
 void MainWindow::showHelp(const QString &str)
 {
-    cout << str.toStdString() << endl;
+    std::cout << str.toStdString() << std::endl;
 }
 
 ConfigPanel *MainWindow::config()
@@ -434,7 +434,7 @@ DisplayContainer *MainWindow::dc()
 
 void MainWindow::test()
 {
-    cout << "MainWindow::test" << endl;
+    std::cout << "MainWindow::test" << std::endl;
 }
 
 Launcher::Launcher(QMainWindow *parent)

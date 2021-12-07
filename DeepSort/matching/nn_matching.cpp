@@ -1,8 +1,6 @@
 #include "nn_matching.h"
 #include "../errmsg.h"
 
-using namespace Eigen;
-
 NearNeighborDisMetric::NearNeighborDisMetric(NearNeighborDisMetric::METRIC_TYPE metric, float matching_threshold, int budget)
 {
     if (metric == euclidean) {
@@ -98,16 +96,16 @@ void NearNeighborDisMetric::partial_fit(std::vector<TRACKER_DATA> &tid_feats, st
 
 Eigen::VectorXf NearNeighborDisMetric::_nncosine_distance(const FEATURES &x, const FEATURES &y)
 {
-    MatrixXf distances = _cosine_distance(x,y);
-    VectorXf res = distances.colwise().minCoeff().transpose();
+    Eigen::MatrixXf distances = _cosine_distance(x,y);
+    Eigen::VectorXf res = distances.colwise().minCoeff().transpose();
     return res;
 }
 
 Eigen::VectorXf NearNeighborDisMetric::_nneuclidean_distance(const FEATURES &x, const FEATURES &y)
 {
-    MatrixXf distances = _pdist(x,y);
-    VectorXf res = distances.colwise().maxCoeff().transpose();
-    res = res.array().max(VectorXf::Zero(res.rows()).array());
+    Eigen::MatrixXf distances = _pdist(x,y);
+    Eigen::VectorXf res = distances.colwise().maxCoeff().transpose();
+    res = res.array().max(Eigen::VectorXf::Zero(res.rows()).array());
     return res;
 }
 
@@ -117,10 +115,10 @@ Eigen::MatrixXf NearNeighborDisMetric::_pdist(const FEATURES &x, const FEATURES 
     if (len1 == 0 || len2 == 0) {
         return Eigen::MatrixXf::Zero(len1, len2);
     }
-    MatrixXf res = x * y.transpose()* -2;
+    Eigen::MatrixXf res = x * y.transpose()* -2;
     res = res.colwise() + x.rowwise().squaredNorm();
     res = res.rowwise() + y.rowwise().squaredNorm().transpose();
-    res = res.array().max(MatrixXf::Zero(res.rows(), res.cols()).array());
+    res = res.array().max(Eigen::MatrixXf::Zero(res.rows(), res.cols()).array());
     return res;
 }
 
@@ -129,6 +127,6 @@ Eigen::MatrixXf NearNeighborDisMetric::_cosine_distance(const FEATURES & a, cons
         //undo:
         assert(false);
     }
-    MatrixXf res = 1. - (a*b.transpose()).array();
+    Eigen::MatrixXf res = 1. - (a*b.transpose()).array();
     return res;
 }

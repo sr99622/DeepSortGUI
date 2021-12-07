@@ -200,7 +200,7 @@ void OptionPanel::test()
 {
     QString str = print_codecs(0);
     optionList = str.split("\n");
-    cout << "filterOptionList" << endl;
+    std::cout << "filterOptionList" << std::endl;
     helpDisplay->setText(filterOptionList(filterEdit->text()));
 }
 
@@ -213,7 +213,7 @@ void OptionPanel::display(const QString& str, const QString& title)
 
 void OptionPanel::filterChanged(const QString& str)
 {
-    cout << str.toStdString() << endl;
+    std::cout << str.toStdString() << std::endl;
     helpDisplay->setText(filterOptionList(str));
 }
 
@@ -469,14 +469,14 @@ void OptionPanel::show_help_codec(const char *name, int encoder)
                       avcodec_find_decoder_by_name(name);
 
     if (codec)
-        cout << print_codec(codec).toStdString() << endl; //print_codec(codec);
+        std::cout << print_codec(codec).toStdString() << std::endl; //print_codec(codec);
     else if ((desc = avcodec_descriptor_get_by_name(name))) {
         int printed = 0;
 
         while ((codec = next_codec_for_id(desc->id, codec, encoder))) {
             printed = 1;
             //print_codec(codec);
-            cout << print_codec(codec).toStdString() << endl;
+            std::cout << print_codec(codec).toStdString() << std::endl;
         }
 
         if (!printed) {
@@ -713,7 +713,7 @@ unsigned OptionPanel::get_codecs_sorted(const AVCodecDescriptor ***rcodecs)
     while ((desc = avcodec_descriptor_next(desc)))
         nb_codecs++;
     if (!(codecs = (const AVCodecDescriptor**)av_calloc(nb_codecs, sizeof(*codecs)))) {
-        cout << "Out of memory\n" << endl;
+        std::cout << "Out of memory\n" << std::endl;
         exit_program(1);
     }
     desc = NULL;
